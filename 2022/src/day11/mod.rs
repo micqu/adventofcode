@@ -41,6 +41,7 @@ pub fn d11_2() {
             }
         }
     }
+    
     let mut inspections = monkeys.iter()
         .map(|x| x.inspections)
         .collect::<Vec<u64>>();

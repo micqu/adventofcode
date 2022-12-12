@@ -41,7 +41,7 @@ fn main() {
     // day10::d10_2();
     // day11::d11_1();
     // day11::d11_2();
-    // day12::d12_1();
+    day12::d12_1();
     day12::d12_2();
 
     let end = SystemTime::now();

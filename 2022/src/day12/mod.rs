@@ -7,8 +7,6 @@ use crate::utils;
 pub fn d12_1() {
     let mut start_pos: (i32, i32) = (0, 0);
     let mut end_pos: (i32, i32) = (0, 0);
-    let ch_start = 'S' as i32;
-    let ch_end = 'E' as i32;
 
     let mut map = Vec::<Vec<i32>>::new();
     let mut reader = utils::Reader::load_input("src/day12/input.txt").unwrap();
@@ -23,13 +21,13 @@ pub fn d12_1() {
             })
             .collect();
         {
-            match l.iter().position(|&x| x == ch_start) {
+            match l.iter().position(|&x| x == 'S' as i32) {
                 Some(idx) => {
                     start_pos = (idx as i32, map.len() as i32);
                 }
                 None => {},
             }
-            match l.iter().position(|&x| x == ch_end) {
+            match l.iter().position(|&x| x == 'E' as i32) {
                 Some(idx) => {
                     end_pos = (idx as i32, map.len() as i32);
                 }
@@ -40,76 +38,22 @@ pub fn d12_1() {
     }
     
     map[start_pos.1 as usize][start_pos.0 as usize] = 0;
-    map[end_pos.1 as usize][end_pos.0 as usize] = 'z' as i32 - 97;
+    map[end_pos.1 as usize][end_pos.0 as usize] = 26;
 
-    let h: i32 = map.len() as i32;
-    let w: i32 = map[0].len() as i32;
-
-    let mut goal: Option<Node> = None;
-    let mut visited = HashMap::<u64, Node>::new();
-    let mut mem = HashMap::<u64, i32>::new();
-    let mut q = BinaryHeap::<Node>::new();
-    q.push(Node {
+    let start_node = Node {
         cost: 0,
         level: 0,
         position: start_pos,
         prev: None,
-    });
-    
-    while let Some(v) = q.pop() {
-        if v.position == end_pos {
-            goal = Some(v);
-            break;
-        }
-        
-        for mut n in v.get_neighbours(&map, w, h) {
-            let c = v.cost + n.cost;
-            
-            match mem.get_mut(&n.get_id()) {
-                Some(p) => {
-                    if c < *p {
-                        *p = c;
-                    }
-                    continue;
-                },
-                None => {
-                    mem.insert(n.get_id(), c);
-                },
-            }
-            n.cost = c;
-            q.push(n);
-        }
-        
-        if !visited.contains_key(&v.get_id()) {
-            visited.insert(v.get_id(), v);
-        }
-    }
-
-    let mut count = 0;
-    let mut path = Vec::<(i32, i32)>::new();
-    while let Some(n) = goal {
-        let pos = id_to_pos(n.get_id());
-        path.push(pos);
-        count += 1;
-
-        match n.prev {
-            Some(p) => {
-                let node = visited.get(&p);
-                goal = Some(*node.unwrap());
-            },
-            None => {
-                break;
-            },
-        }
-    }
-    println!("{}", count - 1);
+    };
+    let path = dijkstra(start_node, |n| n.position == end_pos, &map);
+    println!("{}", path.len() - 1);
 }
 
 pub fn d12_2() {
     let mut start_pos: (i32, i32) = (0, 0);
-    let ch_start= 'E' as i32;
-
     let mut map = Vec::<Vec<i32>>::new();
+
     let mut reader = utils::Reader::load_input("src/day12/input.txt").unwrap();
     let mut buffer = String::new();
     while let Some(line) = reader.read_line(&mut buffer) {
@@ -122,7 +66,7 @@ pub fn d12_2() {
             })
             .collect();
         {
-            match l.iter().position(|&x| x == ch_start) {
+            match l.iter().position(|&x| x == 'E' as i32) {
                 Some(idx) => {
                     start_pos = (idx as i32, map.len() as i32);
                 }
@@ -134,27 +78,30 @@ pub fn d12_2() {
     
     map[start_pos.1 as usize][start_pos.0 as usize] = 0;
 
-    let h: i32 = map.len() as i32;
-    let w: i32 = map[0].len() as i32;
-
-    let mut goal: Option<Node> = None;
-    let mut visited = HashMap::<u64, Node>::new();
-    let mut mem = HashMap::<u64, i32>::new();
-    let mut q = BinaryHeap::<Node>::new();
-    q.push(Node {
+    let start_node = Node {
         cost: 0,
         level: 0,
         position: start_pos,
         prev: None,
-    });
+    };
+    let path = dijkstra(start_node, |n| n.level == 26, &map);
+    println!("{}", path.len() - 1);
+}
+
+fn dijkstra(start_node: Node, f_goal: impl Fn(Node) -> bool, map: &Vec<Vec<i32>>) -> Vec<(i32, i32)> {
+    let mut goal: Option<Node> = None;
+    let mut visited = HashMap::<u64, Node>::new();
+    let mut mem = HashMap::<u64, i32>::new();
+    let mut q = BinaryHeap::<Node>::new();
+    q.push(start_node);
     
     while let Some(v) = q.pop() {
-        if v.level == 26 {
+        if f_goal(v) {
             goal = Some(v);
             break;
         }
         
-        for mut n in v.get_neighbours(&map, w, h) {
+        for mut n in v.get_neighbours(&map) {
             let c = v.cost + n.cost;
             
             match mem.get_mut(&n.get_id()) {
@@ -177,13 +124,9 @@ pub fn d12_2() {
         }
     }
 
-    let mut count = 0;
     let mut path = Vec::<(i32, i32)>::new();
     while let Some(n) = goal {
-        let pos = id_to_pos(n.get_id());
-        path.push(pos);
-        count += 1;
-
+        path.push(id_to_pos(n.get_id()));
         match n.prev {
             Some(p) => {
                 let node = visited.get(&p);
@@ -194,7 +137,7 @@ pub fn d12_2() {
             },
         }
     }
-    println!("{}", count - 1);
+    path
 }
 
 pub fn id_to_pos(id: u64) -> (i32, i32) {
@@ -213,7 +156,10 @@ struct Node {
 }
 
 impl Node {
-    pub fn get_neighbours(&self, map: &Vec<Vec<i32>>, w: i32, h: i32) -> Vec<Node> {
+    pub fn get_neighbours(&self, map: &Vec<Vec<i32>>) -> Vec<Node> {
+        let h: i32 = map.len() as i32;
+        let w: i32 = map[0].len() as i32;
+
         let adjacent = [(1, 0), (-1, 0), (0, 1), (0, -1)];
         adjacent
             .map(|x| (self.position.0 + x.0, self.position.1 + x.1))
