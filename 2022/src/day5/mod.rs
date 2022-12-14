@@ -1,5 +1,10 @@
 use crate::utils;
 
+pub fn d5() {
+    d5_1();
+    d5_2();
+}
+
 pub fn d5_1() {
     let n = 9;
     let mut piles: Vec<Vec<String>> = vec![Vec::new(); n];

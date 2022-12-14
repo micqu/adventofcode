@@ -2,6 +2,11 @@ use core::panic;
 
 use crate::utils;
 
+pub fn d10() {
+    d10_1();
+    d10_2();
+}
+
 pub fn d10_1() {
     let mut x: i32 = 1;
     let mut cycle = 1;

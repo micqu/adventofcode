@@ -2,9 +2,13 @@ use core::panic;
 
 use crate::utils;
 
-pub fn d11_1() {
+pub fn d11() {
     let mut monkeys = parse("src/day11/input.txt");
-    
+    d11_1(&mut monkeys.clone());
+    d11_2(&mut monkeys);
+}
+
+pub fn d11_1(monkeys: &mut Vec<Monkey>) {
     for _ in 0..20 {
         for m in 0..monkeys.len() {
             monkeys[m].inspections += monkeys[m].items.len() as u64;
@@ -24,10 +28,9 @@ pub fn d11_1() {
     println!("{}", inspections[monkeys.len() - 1] * inspections[monkeys.len() - 2]);
 }
 
-pub fn d11_2() {
-    let mut monkeys = parse("src/day11/input.txt");
+pub fn d11_2(monkeys: &mut Vec<Monkey>) {
     let tsum: u64 = monkeys.iter().map(|x| x.test).product();
-
+    
     for _ in 0..10000 {
         for m in 0..monkeys.len() {
             monkeys[m].inspections += monkeys[m].items.len() as u64;
@@ -92,8 +95,8 @@ fn parse(file: &str) -> Vec<Monkey> {
     monkeys
 }
 
-#[derive(Default)]
-struct Monkey {
+#[derive(Default, Clone)]
+pub struct Monkey {
     pub items: Vec::<u64>,
     pub operation: Option<Operation>,
     pub test: u64,
@@ -120,7 +123,8 @@ impl Monkey {
     }
 }
 
-struct Operation {
+#[derive(Clone)]
+pub struct Operation {
     pub left: String,
     pub right: String,
     pub op: String,

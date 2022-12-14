@@ -1,5 +1,10 @@
 use crate::utils;
 
+pub fn d8() {
+    d8_1();
+    d8_2();
+}
+
 pub fn d8_1() {
     let mut map = Vec::<Vec<u8>>::new();
     

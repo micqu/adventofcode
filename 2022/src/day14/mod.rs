@@ -1,9 +1,13 @@
-use std::collections::{VecDeque, HashSet};
-
 use crate::utils;
 
-pub fn d14_1() {
+pub fn d14() {
     let mut map = parse("src/day14/input.txt");
+    // d14_1_sim(&mut map.clone());
+    d14_1(&mut map.clone());
+    d14_2(&mut map);
+}
+
+pub fn d14_1_sim(map: &mut Vec<Vec<u8>>) {
     let mut count = 0;
     let floor = 171;
     loop {
@@ -12,7 +16,7 @@ pub fn d14_1() {
             .position(|x| x == 1)
             .unwrap() as i32;
         let mut sand: (i32, i32) = (500, top - 1);
-        loop {            
+        loop {
             let last = sand;
             let new_y = (sand.1 + 1) as usize;
             
@@ -45,15 +49,47 @@ pub fn d14_1() {
     println!("{}", count);
 }
 
-pub fn d14_2() {
-    let map = parse("src/day14/input.txt");
-    let start_node = Node { position: (500, 0) };
-    let count = bfs(start_node, |n| n.position.1 == 171, &map);
-    println!("{}", count);
+pub fn d14_1(map: &mut Vec<Vec<u8>>) {
+    let mut c = 0;
+    let mut q = Vec::<Node>::new();
+    q.push(Node { x: 500, y: 0, cost: 0 });
+
+    while let Some(v) = q.pop() {
+        if v.y + 1 == 171 {
+            println!("{}", c - v.cost);
+            return;
+        }
+        
+        c += 1;
+        for n in v.get_neighbours_dfs(&map) {
+            if map[n.y as usize][n.x as usize] == 0 {
+                map[n.y as usize][n.x as usize] = 1;
+                q.push(n);
+            }
+        }
+    }
 }
 
-fn parse(file: &str) -> Vec::<Vec<i32>> {
-    let mut s = vec![vec![0; 1000]; 172];
+pub fn d14_2(map: &mut Vec<Vec<u8>>) {
+    let mut c = 0;
+    let mut q = Vec::<Node>::new();
+    q.push(Node { x: 500, y: 0, cost: 0 });
+
+    while let Some(v) = q.pop() {
+        c += 1;
+        for n in v.get_neighbours_bfs(&map) {
+            if map[n.y as usize][n.x as usize] == 0 {
+                map[n.y as usize][n.x as usize] = 1;
+                q.push(n);
+            }
+        }
+    }
+
+    println!("{}", c);
+}
+
+fn parse(file: &str) -> Vec::<Vec<u8>> {
+    let mut s = vec![vec![0; 700]; 171];
     let mut reader = utils::Reader::load_input(file).unwrap();
     let mut buffer = String::new();
     while let Some(line) = reader.read_line(&mut buffer) {
@@ -93,46 +129,26 @@ fn parse(file: &str) -> Vec::<Vec<i32>> {
     s
 }
 
-fn bfs(start_node: Node, f_goal: impl Fn(&Node) -> bool, map: &Vec<Vec<i32>>) -> usize {
-    let mut c = 0;
-    let mut mem = HashSet::<u64>::new();
-    let mut q = VecDeque::<Node>::new();
-    q.push_back(start_node);
-    while let Some(v) = q.pop_front() {
-        if f_goal(&v) {
-            break;
-        }
-        c += 1;
-        for n in v.get_neighbours(&map) {
-            let id = n.get_id();
-            if !mem.contains(&id) {
-                mem.insert(id);
-                q.push_back(n);
-            }
-        }
-    }
-    c
-}
-
 struct Node {
-    pub position: (i32, i32),
+    pub x: i16,
+    pub y: i16,
+    pub cost: u16,
 }
 
 impl Node {
-    pub fn get_neighbours(&self, map: &Vec<Vec<i32>>) -> Vec<Node> {
-        [(0, 1), (-1, 1), (1, 1)]
-            .map(|x| (self.position.0 + x.0, self.position.1 + x.1))
-            .iter()
-            .filter(|&&sand|
-                map[sand.1 as usize][sand.0 as usize] == 0
-                || map[sand.1 as usize][sand.0 as usize] == 0
-                || map[sand.1 as usize][sand.0 as usize] == 0
-            )
-            .map(|&x| Node { position: x })
+    pub fn get_neighbours_bfs(&self, map: &Vec<Vec<u8>>) -> Vec<Node> {
+        [(0, 1), (-1, 1), (1, 1)].iter()
+            .map(|n| (self.x + n.0, self.y + n.1))
+            .filter(|&n| n.1 < 171 && map[n.1 as usize][n.0 as usize] == 0)
+            .map(|n| Node { x: n.0, y: n.1, cost: self.cost + 1 })
             .collect()
     }
 
-    pub fn get_id(&self) -> u64 {
-        self.position.0 as u64 | (self.position.1 as u64) << 32 
+    pub fn get_neighbours_dfs(&self, map: &Vec<Vec<u8>>) -> Vec<Node> {
+        [(1, 1), (-1, 1), (0, 1)].iter()
+            .map(|n| (self.x + n.0, self.y + n.1))
+            .filter(|&n| n.1 < 171 && map[n.1 as usize][n.0 as usize] == 0)
+            .map(|n| Node { x: n.0, y: n.1, cost: self.cost + 1 })
+            .collect()
     }
 }

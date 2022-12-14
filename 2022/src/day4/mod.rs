@@ -1,5 +1,10 @@
 use crate::utils;
 
+pub fn d4() {
+    d4_1();
+    d4_2();
+}
+
 pub fn d4_1() {
     let reader = utils::Reader::load_input("src/day4/input.txt").unwrap();
     let overlaps: u32 = reader

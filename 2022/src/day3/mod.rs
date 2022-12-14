@@ -1,6 +1,11 @@
 use std::{self, collections::{HashSet, HashMap}};
 use crate::utils;
 
+pub fn d3() {
+    d3_1();
+    d3_2();
+}
+
 pub fn d3_1() {
     let mut score = 0;
     let score_map = score_map();

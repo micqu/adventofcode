@@ -3,6 +3,11 @@ use std::collections::HashSet;
 
 use crate::utils;
 
+pub fn d9() {
+    d9_1();
+    d9_2();
+}
+
 pub fn d9_1() {
     let mut h: (i32, i32) = (0, 0);
     let mut t: (i32, i32) = (0, 0);

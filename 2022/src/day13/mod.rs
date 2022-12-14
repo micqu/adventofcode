@@ -2,8 +2,14 @@ use std::cmp::Ordering;
 
 use crate::utils;
 
-pub fn d13_1() {
-    let result: u32 = parse("src/day13/inputp1.txt")
+pub fn d13() {
+    let mut s = parse("src/day13/inputp2.txt");
+    d13_1(&mut s.clone());
+    d13_2(&mut s);
+}
+
+pub fn d13_1(data: &mut Vec<El>) {
+    let result: u32 = data
         .chunks_mut(2)
         .enumerate()
         .map(|(i, x)| {
@@ -16,13 +22,16 @@ pub fn d13_1() {
     println!("{}", result);
 }
 
-pub fn d13_2() {
-    let mut s = parse("src/day13/inputp2.txt");
-    s.sort_unstable();
+pub fn d13_2(data: &mut Vec<El>) {
     let a = El::List(vec![El::List(vec![El::List(vec![El::Number(2)])])]);
     let b = El::List(vec![El::List(vec![El::List(vec![El::Number(6)])])]);
-    let p1 = s.iter().position(|x| *x == a).unwrap() + 1;
-    let p2 = s.iter().position(|x| *x == b).unwrap() + 1;
+    data.insert(0, a.clone());
+    data.insert(0, b.clone());
+    
+    data.sort_unstable();
+
+    let p1 = data.iter().position(|x| *x == a).unwrap() + 1;
+    let p2 = data.iter().position(|x| *x == b).unwrap() + 1;
     println!("{}", p1 * p2);
 }
 
@@ -85,7 +94,7 @@ fn split_keep<'a>(text: &'a str) -> Vec<&'a str> {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-enum El {
+pub enum El {
     List(Vec<El>),
     Number(u32)
 }

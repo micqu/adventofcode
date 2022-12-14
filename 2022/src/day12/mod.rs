@@ -2,6 +2,11 @@ use std::{collections::{HashMap, BinaryHeap}, cmp::Ordering};
 
 use crate::utils;
 
+pub fn d12() {
+    d12_1();
+    d12_2();
+}
+
 pub fn d12_1() {
     let mut start_pos: (i32, i32) = (0, 0);
     let mut end_pos: (i32, i32) = (0, 0);
@@ -20,15 +25,11 @@ pub fn d12_1() {
             .collect();
         {
             match l.iter().position(|&x| x == 'S' as i32) {
-                Some(idx) => {
-                    start_pos = (idx as i32, map.len() as i32);
-                }
+                Some(idx) => start_pos = (idx as i32, map.len() as i32),
                 None => {},
             }
             match l.iter().position(|&x| x == 'E' as i32) {
-                Some(idx) => {
-                    end_pos = (idx as i32, map.len() as i32);
-                }
+                Some(idx) => end_pos = (idx as i32, map.len() as i32),
                 None => {},
             }
         }
@@ -65,9 +66,7 @@ pub fn d12_2() {
             .collect();
         {
             match l.iter().position(|&x| x == 'E' as i32) {
-                Some(idx) => {
-                    start_pos = (idx as i32, map.len() as i32);
-                }
+                Some(idx) => start_pos = (idx as i32, map.len() as i32),
                 None => {},
             }
         }
@@ -157,18 +156,14 @@ impl Node {
         let h: i32 = map.len() as i32;
         let w: i32 = map[0].len() as i32;
 
-        let adjacent = [(1, 0), (-1, 0), (0, 1), (0, -1)];
-        adjacent
+        [(1, 0), (-1, 0), (0, 1), (0, -1)].iter()
             .map(|x| (self.position.0 + x.0, self.position.1 + x.1))
-            .iter()
-            .filter(|&&x| x.0 >= 0 && x.0 < w && x.1 >= 0 && x.1 < h)
-            .map(|&x| {
-                Node {
-                    cost: 1,
-                    level: map[x.1 as usize][x.0 as usize],
-                    position: x,
-                    prev: Some(self.get_id()),
-                }
+            .filter(|&x| x.0 >= 0 && x.0 < w && x.1 >= 0 && x.1 < h)
+            .map(|x| Node {
+                cost: 1,
+                level: map[x.1 as usize][x.0 as usize],
+                position: x,
+                prev: Some(self.get_id()),
             })
             .filter(|x| (x.level - self.level) <= 1)
             .collect()

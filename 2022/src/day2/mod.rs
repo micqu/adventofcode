@@ -1,5 +1,10 @@
 use crate::utils;
 
+pub fn d2() {
+    d2_1();
+    d2_2();
+}
+
 pub fn d2_1() {    
     let mut score = 0;
     

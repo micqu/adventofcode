@@ -1,5 +1,10 @@
 use crate::utils;
 
+pub fn d1() {
+    d1_1();
+    d1_2();
+}
+
 pub fn d1_1() {
     let mut curr = 0;
     let mut sum = 0;
