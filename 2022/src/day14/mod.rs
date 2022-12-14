@@ -14,16 +14,17 @@ pub fn d14_1() {
         let mut sand: (i32, i32) = (500, (top - 1) as i32);
         loop {
             let last = sand;
-            if (sand.1 + 1) as usize >= map.len() {
+            let new_y = (sand.1 + 1) as usize;
+            if new_y >= map.len() {
                 println!("{}", count);
                 return;
             }
-            if map[(sand.1 + 1) as usize][sand.0 as usize] == 0 {
+            if map[new_y][sand.0 as usize] == 0 {
                 sand.1 += 1;
-            } else if map[(sand.1 + 1) as usize][(sand.0 - 1) as usize] == 0 {
+            } else if map[new_y][(sand.0 - 1) as usize] == 0 {
                 sand.0 -= 1;
                 sand.1 += 1;
-            } else if map[(sand.1 + 1) as usize][(sand.0 + 1) as usize] == 0 {
+            } else if map[new_y][(sand.0 + 1) as usize] == 0 {
                 sand.0 += 1;
                 sand.1 += 1;
             }
@@ -49,13 +50,14 @@ pub fn d14_2() {
         let mut sand: (i32, i32) = (500, (top - 1) as i32);
         loop {            
             let last = sand;
-            if sand.1 + 1 != floor {
-                if map[(sand.1 + 1) as usize][sand.0 as usize] == 0 {
+            let new_y = (sand.1 + 1) as usize;
+            if new_y != floor {
+                if map[new_y][sand.0 as usize] == 0 {
                     sand.1 += 1;
-                } else if map[(sand.1 + 1) as usize][(sand.0 - 1) as usize] == 0 {
+                } else if map[new_y][(sand.0 - 1) as usize] == 0 {
                     sand.0 -= 1;
                     sand.1 += 1;
-                } else if map[(sand.1 + 1) as usize][(sand.0 + 1) as usize] == 0 {
+                } else if map[new_y][(sand.0 + 1) as usize] == 0 {
                     sand.0 += 1;
                     sand.1 += 1;
                 }
