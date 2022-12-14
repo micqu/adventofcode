@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 
-use std::{collections::VecDeque, cmp::Ordering};
+use std::cmp::Ordering;
 
 use crate::utils;
 
@@ -9,43 +9,27 @@ pub fn d13_1() {
         .chunks_mut(2)
         .enumerate()
         .map(|(i, x)| {
-            let a = x[0].pop_front().unwrap();
-            let b = x[1].pop_front().unwrap();
-            let result = solve(&a, &b);
-            if result == 2 {
-                return 0;
+            if &x[0] < &x[1] {
+                return (i + 1) as u32;
             }
-            (i + 1) as u32
+            0
         })
         .sum();
     println!("{}", result);
 }
 
 pub fn d13_2() {
-    let s = parse("src/day13/inputp2.txt");
-    let mut es = s
-        .iter()
-        .enumerate()
-        .collect::<Vec<(usize, &VecDeque<El>)>>();
-    
-        es.sort_by(|a, b| {
-        let af = a.1.front().unwrap();
-        let bf = b.1.front().unwrap();
-        let result = solve(&af, &bf);
-        return match result {
-            2 => Ordering::Greater,
-            1 => Ordering::Less,
-            0 => Ordering::Equal,
-            _ => panic!()
-        }
-    });
-    let p1 = es.iter().position(|x| x.0 == 0).unwrap() + 1;
-    let p2 = es.iter().position(|x| x.0 == 1).unwrap() + 1;
+    let mut s = parse("src/day13/inputp2.txt");
+    s.sort_unstable();
+    let a = El::List(vec![El::List(vec![El::List(vec![El::Number(2)])])]);
+    let b = El::List(vec![El::List(vec![El::List(vec![El::Number(6)])])]);
+    let p1 = s.iter().position(|x| *x == a).unwrap() + 1;
+    let p2 = s.iter().position(|x| *x == b).unwrap() + 1;
     println!("{}", p1 * p2);
 }
 
-fn parse(file: &str) -> Vec::<VecDeque<El>> {
-    let mut s = Vec::<VecDeque<El>>::new();
+fn parse(file: &str) -> Vec::<El> {
+    let mut s = Vec::<El>::new();
     let mut reader = utils::Reader::load_input(file).unwrap();
     let mut buffer = String::new();
     while let Some(line) = reader.read_line(&mut buffer) {
@@ -55,36 +39,33 @@ fn parse(file: &str) -> Vec::<VecDeque<El>> {
             continue;
         }
 
-        let mut st = VecDeque::<El>::new();
+        let mut st = Vec::<El>::new();
         split_keep(line_unwrapped.trim())
             .iter()
             .filter(|&&x| x != ",")
-            .map(|x| *x)
-            .for_each(|x| {
-                match x {
-                    "[" => {
-                        let new_list = El::List(VecDeque::<El>::new());
-                        st.push_back(new_list);
-                    },
-                    "]" => {
-                        if st.len() > 1 {
-                            let last = st.pop_back().unwrap();
-                            match st.iter_mut().last() {
-                                Some(El::List(list)) => list.push_back(last),
-                                _ => st.push_back(last)
-                            }
-                        }
-                    },
-                    a => {
-                        let n = a.parse::<u32>().unwrap();
+            .for_each(|x| match *x {
+                "[" => {
+                    let new_list = El::List(Vec::<El>::new());
+                    st.push(new_list);
+                },
+                "]" => {
+                    if st.len() > 1 {
+                        let last = st.pop().unwrap();
                         match st.iter_mut().last() {
-                            Some(El::List(list)) => list.push_back(El::Number(n)),
-                            _ => st.push_back(El::Number(n))
+                            Some(El::List(list)) => list.push(last),
+                            _ => st.push(last)
                         }
+                    }
+                },
+                a => {
+                    let n = a.parse::<u32>().unwrap();
+                    match st.iter_mut().last() {
+                        Some(El::List(list)) => list.push(El::Number(n)),
+                        _ => st.push(El::Number(n))
                     }
                 }
             });
-        s.push(st);
+        s.push(El::List(st));
     }
     s
 }
@@ -105,60 +86,44 @@ fn split_keep<'a>(text: &'a str) -> Vec<&'a str> {
     result
 }
 
-fn solve(a: &El, b: &El) -> u32 {
-    match a.clone() {
-        El::List(mut alist) => {
-            match b.clone() {
-                El::List(mut blist) => {
-                    let mut result = 0;
-                    while result == 0 {
-                        let af = alist.pop_front();
-                        let bf = blist.pop_front();
-                        let at = !af.is_none() as i32;
-                        let bt = !bf.is_none() as i32;
-                        if at == 0 && bt == 0 {
-                            return 0;
-                        }
-                        if at == 0 && bt == 1 {
-                            return 1;
-                        }
-                        if at == 1 && bt == 0 {
-                            return 2;
-                        }
-                        result = solve(&af.unwrap(), &bf.unwrap());
-                    }
-                    return result;
-                },
-                El::Number(bn) => {
-                    let mut new_list = VecDeque::new();
-                    new_list.push_back(El::Number(bn));
-                    return solve(a, &El::List(new_list));
-                }
-            }
-        },
-        El::Number(an) => {
-            match b.clone() {
-                El::List(_) => {
-                    let mut new_list = VecDeque::new();
-                    new_list.push_back(El::Number(an));
-                    return solve(&El::List(new_list), b);
-                },
-                El::Number(bn) => {
-                    if an == bn {
-                        return 0;
-                    }
-                    if an < bn {
-                        return 1;
-                    }
-                    return 2;
-                }
-            }
-        }
+#[derive(Debug, Clone, PartialEq, Eq)]
+enum El {
+    List(Vec<El>),
+    Number(u32)
+}
+
+impl PartialOrd for El {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(&other))
     }
 }
 
-#[derive(Debug, Clone)]
-enum El {
-    List(VecDeque<El>),
-    Number(u32)
+impl Ord for El {
+    fn cmp(&self, other: &Self) -> Ordering {
+        match self {
+            El::List(alist) => match other {
+                El::List(blist) => {
+                    let mut ai = alist.iter();
+                    let mut bi = blist.iter();
+                    loop {
+                        let af = ai.next();
+                        let bf = bi.next();
+                        let cmp =  bf.is_none().cmp(&af.is_none());
+                        if cmp == Ordering::Equal && af.is_none() && bf.is_none() {
+                            return cmp;
+                        }
+                        let result = af.cmp(&bf);
+                        if result.is_ne() {
+                            return result;
+                        }
+                    }
+                },
+                El::Number(bn) => self.cmp(&El::List(vec![El::Number(*bn)]))
+            },
+            El::Number(an) => match other {
+                El::List(_) => El::List(vec![El::Number(*an)]).cmp(&other),
+                El::Number(bn) => an.cmp(&bn)
+            }
+        }
+    }
 }
