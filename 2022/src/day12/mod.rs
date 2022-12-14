@@ -141,7 +141,6 @@ fn dijkstra(start_node: Node, f_goal: impl Fn(Node) -> bool, map: &Vec<Vec<i32>>
 }
 
 pub fn id_to_pos(id: u64) -> (i32, i32) {
-    
     let x = id & (i32::MAX as u64);
     let y = (id & ((i32::MAX as u64) << 32)) >> 32;
     (x as i32, y as i32)
