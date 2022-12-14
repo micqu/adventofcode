@@ -1,5 +1,3 @@
-#![allow(dead_code)]
-
 use std::{self, collections::HashSet};
 use crate::utils;
 

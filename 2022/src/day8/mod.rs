@@ -1,5 +1,3 @@
-#![allow(dead_code)]
-
 use crate::utils;
 
 pub fn d8_1() {

@@ -1,14 +1,11 @@
-#![allow(dead_code)]
-
-use std::collections::{HashMap, VecDeque};
+use std::collections::{VecDeque, HashSet};
 
 use crate::utils;
 
-pub fn d14_1_2() {
+pub fn d14_1() {
     let mut map = parse("src/day14/input.txt");
     let mut count = 0;
     let floor = 171;
-    let mut f = true;
     loop {
         let top = map.iter()
             .map(|x| x[500])
@@ -18,20 +15,22 @@ pub fn d14_1_2() {
         loop {            
             let last = sand;
             let new_y = (sand.1 + 1) as usize;
-            if new_y != floor {
-                if map[new_y][sand.0 as usize] == 0 {
-                    sand.1 += 1;
-                } else if map[new_y][(sand.0 - 1) as usize] == 0 {
-                    sand.0 -= 1;
-                    sand.1 += 1;
-                } else if map[new_y][(sand.0 + 1) as usize] == 0 {
-                    sand.0 += 1;
-                    sand.1 += 1;
-                }
-            } else if f {
+            
+            if new_y == floor {
                 println!("{}", count);
-                f = false;
+                return;
             }
+            
+            if map[new_y][sand.0 as usize] == 0 {
+                sand.1 += 1;
+            } else if map[new_y][(sand.0 - 1) as usize] == 0 {
+                sand.0 -= 1;
+                sand.1 += 1;
+            } else if map[new_y][(sand.0 + 1) as usize] == 0 {
+                sand.0 += 1;
+                sand.1 += 1;
+            }
+            
             if sand == last {
                 break;
             }
@@ -48,11 +47,7 @@ pub fn d14_1_2() {
 
 pub fn d14_2() {
     let map = parse("src/day14/input.txt");
-    let start_node = Node {
-        cost: 0,
-        position: (500, 0),
-        prev: None,
-    };
+    let start_node = Node { position: (500, 0) };
     let count = bfs(start_node, |n| n.position.1 == 171, &map);
     println!("{}", count);
 }
@@ -98,68 +93,42 @@ fn parse(file: &str) -> Vec::<Vec<i32>> {
     s
 }
 
-fn bfs(start_node: Node, f_goal: impl Fn(Node) -> bool, map: &Vec<Vec<i32>>) -> usize {
-    let mut mem = HashMap::<u64, i32>::new();
+fn bfs(start_node: Node, f_goal: impl Fn(&Node) -> bool, map: &Vec<Vec<i32>>) -> usize {
+    let mut c = 0;
+    let mut mem = HashSet::<u64>::new();
     let mut q = VecDeque::<Node>::new();
     q.push_back(start_node);
-    let mut c = 0;
     while let Some(v) = q.pop_front() {
-        if f_goal(v) {
+        if f_goal(&v) {
             break;
         }
         c += 1;
-        for mut n in v.get_neighbours(&map) {
-            let c = v.cost + n.cost;
-            
-            match mem.get_mut(&n.get_id()) {
-                Some(p) => {
-                    if c < *p {
-                        *p = c;
-                    }
-                    continue;
-                },
-                None => {
-                    mem.insert(n.get_id(), c);
-                },
+        for n in v.get_neighbours(&map) {
+            let id = n.get_id();
+            if !mem.contains(&id) {
+                mem.insert(id);
+                q.push_back(n);
             }
-            n.cost = c;
-            q.push_back(n);
         }
     }
     c
 }
 
-pub fn id_to_pos(id: u64) -> (i32, i32) {
-    let x = id & (i32::MAX as u64);
-    let y = (id & ((i32::MAX as u64) << 32)) >> 32;
-    (x as i32, y as i32)
-}
-
-#[derive(Debug, Copy, Clone)]
 struct Node {
-    pub cost: i32,
     pub position: (i32, i32),
-    pub prev: Option<u64>,
 }
 
 impl Node {
     pub fn get_neighbours(&self, map: &Vec<Vec<i32>>) -> Vec<Node> {
-        let adjacent = [(0, 1), (-1, 1), (1, 1)];
-        adjacent
+        [(0, 1), (-1, 1), (1, 1)]
             .map(|x| (self.position.0 + x.0, self.position.1 + x.1))
             .iter()
-            .filter(|&&sand| {
+            .filter(|&&sand|
                 map[sand.1 as usize][sand.0 as usize] == 0
                 || map[sand.1 as usize][sand.0 as usize] == 0
                 || map[sand.1 as usize][sand.0 as usize] == 0
-            })
-            .map(|&x| {
-                Node {
-                    cost: 0,
-                    position: x,
-                    prev: Some(self.get_id()),
-                }
-            })
+            )
+            .map(|&x| Node { position: x })
             .collect()
     }
 

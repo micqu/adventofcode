@@ -47,7 +47,7 @@ fn main() {
     // day12::d12_2();
     // day13::d13_1();
     // day13::d13_2();
-    // day14::d14_1_2();
+    // day14::d14_1();
     day14::d14_2();
 
     let end = SystemTime::now();

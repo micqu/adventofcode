@@ -1,5 +1,3 @@
-#![allow(dead_code)]
-
 use core::panic;
 use std::{collections::HashMap};
 
