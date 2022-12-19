@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 use crate::utils;
 
 pub fn d14() {
@@ -90,42 +92,46 @@ pub fn d14_2(map: &mut Vec<Vec<u8>>) {
 
 fn parse(file: &str) -> Vec::<Vec<u8>> {
     let mut s = vec![vec![0; 700]; 171];
-    let mut reader = utils::Reader::load_input(file).unwrap();
     let mut buffer = String::new();
-    while let Some(line) = reader.read_line(&mut buffer) {
-        line.unwrap()
-            .split("->")
-            .map(|x| x
-                .trim()
-                .split(',')
-                .collect::<Vec<&str>>()
-            )
-            .map(|x| (x[0].parse::<i32>().unwrap(), x[1].parse::<i32>().unwrap()))
-            .collect::<Vec::<_>>()
-            .windows(2)
-            .for_each(|x| {
-                let dx = x[1].0 - x[0].0;
-                if dx > 0 {
-                    for i in 0..=dx {
-                        s[x[0].1 as usize][(x[0].0 + i) as usize] = 1;
+    let mut reader = utils::Reader::load_input(file).unwrap();
+    reader.read(&mut buffer);
+    buffer
+        .lines()
+        .collect::<HashSet<_>>()
+        .iter()
+        .for_each(|line| {
+            line.split("->")
+                .map(|x| x
+                    .trim()
+                    .split(',')
+                    .collect::<Vec<&str>>()
+                )
+                .map(|x| (x[0].parse::<i32>().unwrap(), x[1].parse::<i32>().unwrap()))
+                .collect::<Vec::<_>>()
+                .windows(2)
+                .for_each(|x| {
+                    let dx = x[1].0 - x[0].0;
+                    if dx > 0 {
+                        for i in 0..=dx {
+                            s[x[0].1 as usize][(x[0].0 + i) as usize] = 1;
+                        }
+                    } else {
+                        for i in (0..=-dx).rev() {
+                            s[x[0].1 as usize][(x[0].0 - i) as usize] = 1;
+                        }
                     }
-                } else {
-                    for i in (0..=-dx).rev() {
-                        s[x[0].1 as usize][(x[0].0 - i) as usize] = 1;
+                    let dy = x[1].1 - x[0].1;
+                    if dy > 0 {
+                        for i in 0..=dy {
+                            s[(x[0].1 + i) as usize][x[0].0 as usize] = 1;
+                        }
+                    } else {
+                        for i in (0..=-dy).rev() {
+                            s[(x[0].1 - i) as usize][x[0].0 as usize] = 1;
+                        }
                     }
-                }
-                let dy = x[1].1 - x[0].1;
-                if dy > 0 {
-                    for i in 0..=dy {
-                        s[(x[0].1 + i) as usize][x[0].0 as usize] = 1;
-                    }
-                } else {
-                    for i in (0..=-dy).rev() {
-                        s[(x[0].1 - i) as usize][x[0].0 as usize] = 1;
-                    }
-                }
-            });
-    }
+                });
+        });
     s
 }
 
