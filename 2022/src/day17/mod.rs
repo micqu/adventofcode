@@ -411,22 +411,7 @@ impl Rock {
             map[(self.y - i as u32) as usize] |= self.shape[i] >> self.x;
         }
     }
-
-    fn intersects(&self, map: &Vec<u8>) -> bool {
-        let bbox_bottom = (self.y - self.h as u32 + 1) as usize;
-        let bbox_top = self.y as usize;
-        let map_section = &map[bbox_bottom..=bbox_top];
-        
-        for i in 0..map_section.len() {
-            let moved_shape = self.shape[i] >> self.x;
-            let hit_block = moved_shape & map_section[map_section.len() - i - 1] != 0;
-            if hit_block {
-                return true;
-            }
-        }
-        false
-    }
-
+    
     fn print(&mut self, map: &mut Vec<u8>) {
         for i in 0..self.h as usize {
             map[(self.y - i as u32) as usize] |= self.shape[i] >> self.x;

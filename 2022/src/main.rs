@@ -20,6 +20,7 @@ mod day15;
 mod day16;
 mod day17;
 mod day18;
+mod day19;
 mod utils;
 
 fn main() {
@@ -42,7 +43,8 @@ fn main() {
     // day15::d15();
     // day16::d16();
     // day17::d17();
-    day18::d18();
+    // day18::d18();
+    day19::d19();
 
     let end = SystemTime::now();
     println!("\nTotal time: {}µs", end.duration_since(start).unwrap().as_micros());
