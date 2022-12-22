@@ -6,7 +6,7 @@ pub fn d19() {
     let mut bps: Vec<Blueprint> = Vec::new();
     parse("src/day19/input.txt", &mut bps);
 
-    d19_1(&bps);
+    // d19_1(&bps);
     d19_2(&bps);
 }
 
@@ -153,7 +153,6 @@ fn solve(start: Visit, bp: &Blueprint) -> u32 {
                         resources: new_resources,
                         robots: u.robots,
                     });
-                    break;
                 }
             }
         }
