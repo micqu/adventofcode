@@ -21,7 +21,6 @@ pub fn d21_2() {
     let mut edges = parse("src/day21/input.txt", &mut monkeys);
     
     let root = edges.keys().find(|x| x.name == "root").unwrap().clone();
-    
     let mut new_root = root.clone();
     new_root.monkey_type = MonkeyType::Eq;
     let k = edges.get(root).unwrap().clone();
