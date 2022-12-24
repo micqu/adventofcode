@@ -11,9 +11,10 @@ fn d24_1_2() {
     let mut bsm = HashMap::<u32, HashMap<(i8, i8), Blizzard>>::new();
     let mut bsa: Vec<Blizzard> = Vec::new();
     let (h, w) = parse("src/day24/input.txt", &mut bsa);
-
+    
+    let lcm = (h as usize - 2) * (w as usize - 2) / gcd(h as usize - 2, w as usize - 2);
     bsm.insert(0, bsa.iter().map(|v| ((v.x, v.y), *v)).collect());
-    for t in 1..((h as u32 - 2) * (w as u32 - 2)) as u32 {
+    for t in 1..lcm as u32 {
         bsa.iter_mut().for_each(|v| v.blow_mut(w, h));
         bsm.entry(t).or_insert(bsa.iter().map(|x| ((x.x, x.y), *x)).collect());
     }
@@ -60,8 +61,8 @@ fn search(
                     || (n.0 == 1 && n.1 == 0)
                     || (n.0 == w - 2 && n.1 == h - 1)
                 ).then_some(n)
-            }) {
-
+            }
+        ) {
             if let Some(_) = nbs.get(&(adj.0, adj.1)) {
                 continue;
             }
@@ -158,5 +159,23 @@ impl Blizzard {
         }
         self.x = nx;
         self.y = ny;
+    }
+}
+
+fn gcd(a: usize, b: usize) -> usize {
+    let mut a = a;
+    let mut b = b;
+    if a > b {
+        let c = b;
+        b = a;
+        a = c;
+    }
+    loop {
+        let r = b % a;
+        if r == 0 {
+            return a;
+        }
+        b = a;
+        a = r;
     }
 }
