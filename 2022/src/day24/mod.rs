@@ -1,5 +1,5 @@
 use core::panic;
-use std::collections::{HashSet, HashMap, BinaryHeap};
+use std::{collections::{HashSet, HashMap, BinaryHeap}, hash::Hash, time::SystemTime};
 
 use crate::utils;
 
@@ -8,28 +8,38 @@ pub fn d24() {
 }
 
 fn d24_1_2() {
-    let mut bsm = HashMap::<u32, Vec<Blizzard>>::new();
+    let mut bsm = HashMap::<u32, HashMap<(i8, i8), Blizzard>>::new();
     let mut bsa: Vec<Blizzard> = Vec::new();
     let (h, w) = parse("src/day24/input.txt", &mut bsa);
 
-    for t in 0..((h as usize - 2)*(w as usize - 2)) as u32 {
-        bsa.iter_mut().for_each(|x| x.blow_mut(w, h));
-        bsm.entry(t).or_insert(bsa.clone());
+    bsm.insert(0, bsa.iter().map(|v| ((v.x, v.y), *v)).collect());
+    for t in 1..((h as u32 - 2) * (w as u32 - 2)) as u32 {
+        bsa.iter_mut().for_each(|v| v.blow_mut(w, h));
+        bsm.entry(t).or_insert(bsa.iter().map(|x| ((x.x, x.y), *x)).collect());
     }
 
-    let start = Visit { me: Me { x: 1, y: 0 }, time: 0 };
-    let result = search(start, |u| u.me.x == w - 2 && u.me.y == h - 1, &bsm, w, h).unwrap();
-    println!("{}", result.time + 1);
+    let time = SystemTime::now();
+    let start = Visit { x: 1, y: 0, time: 0 };
+    let result = search(start, |u| u.x == w - 2 && u.y == h - 1, &bsm, w, h).unwrap();
+    println!("{}", result.time);
 
-    let start = Visit { me: Me { x: w - 2, y: h - 1 }, time: result.time + 1 };
-    let result = search(start, |u| u.me.x == 1 && u.me.y == 0, &bsm, w, h).unwrap();
+    let start = Visit { x: w - 2, y: h - 1, time: result.time };
+    let result = search(start, |u| u.x == 1 && u.y == 0, &bsm, w, h).unwrap();
 
-    let start = Visit { me: Me { x: 1, y: 0 }, time: result.time + 1 };
-    let result = search(start, |u| u.me.x == w - 2 && u.me.y == h - 1, &bsm, w, h).unwrap();
-    println!("{}", result.time + 1);
+    let start = Visit { x: 1, y: 0, time: result.time };
+    let result = search(start, |u| u.x == w - 2 && u.y == h - 1, &bsm, w, h).unwrap();
+    println!("{}", result.time);
+
+    println!("Travel time: {:?}", time.elapsed().unwrap());
 }
 
-fn search(start: Visit, goal: impl Fn(&Visit) -> bool, bsm: &HashMap::<u32, Vec<Blizzard>>, w: i8, h: i8) -> Option<Visit> {
+fn search(
+    start: Visit,
+    goal: impl Fn(&Visit) -> bool,
+    bsm: &HashMap::<u32, HashMap<(i8, i8), Blizzard>>,
+    w: i8,
+    h: i8
+) -> Option<Visit> {
     let mut visited = HashSet::<Visit>::new();
     let mut q = BinaryHeap::<Visit>::new();
     q.push(start);
@@ -39,27 +49,26 @@ fn search(start: Visit, goal: impl Fn(&Visit) -> bool, bsm: &HashMap::<u32, Vec<
             return Some(u);
         }
         
-        let nbs = bsm.get(&((u.time + 1) % bsm.len() as u32)).unwrap();
         const ADJ: [(i8, i8); 5] = [(1, 0), (0, 1), (-1, 0), (0, -1), (0, 0)];
-        for adj in ADJ
-            .map(|c| (u.me.x + c.0, u.me.y + c.1))
-            .iter()
-            .filter(|c| {
-                if (c.0 == 1 && c.1 == 0) || (c.0 == w - 2 && c.1 == h - 1) {
-                    return true;
-                }
-                c.0 > 0 && c.0 < w - 1 && c.1 > 0 && c.1 < h - 1
+        let nbs = bsm.get(&((u.time + 1) % bsm.len() as u32)).unwrap();
+        
+        for adj in ADJ.iter()
+            .filter_map(|a| {
+                let n = (u.x + a.0, u.y + a.1);
+                (
+                    (n.0 > 0 && n.0 < w - 1 && n.1 > 0 && n.1 < h - 1)
+                    || (n.0 == 1 && n.1 == 0)
+                    || (n.0 == w - 2 && n.1 == h - 1)
+                ).then_some(n)
             }) {
-                
-            if nbs.iter().any(|c| c.x == adj.0 && c.y == adj.1) {
+
+            if let Some(_) = nbs.get(&(adj.0, adj.1)) {
                 continue;
             }
 
             let n = Visit {
-                me: Me {
-                    x: adj.0,
-                    y: adj.1,
-                },
+                x: adj.0,
+                y: adj.1,
                 time: u.time + 1,
             };
 
@@ -104,7 +113,8 @@ fn parse<'a>(file: &str, blizzards: &'a mut Vec<Blizzard>) -> (i8, i8) {
 
 #[derive(Debug, Eq, PartialEq, Hash, Clone)]
 struct Visit {
-    me: Me,
+    x: i8,
+    y: i8,
     time: u32,
 }
 
@@ -149,10 +159,4 @@ impl Blizzard {
         self.x = nx;
         self.y = ny;
     }
-}
-
-#[derive(Debug, Eq, Ord, PartialEq, PartialOrd, Hash, Clone)]
-struct Me {
-    x: i8,
-    y: i8,
 }

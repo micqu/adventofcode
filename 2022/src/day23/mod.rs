@@ -143,7 +143,7 @@ pub fn d23_1_2_shorter() {
     loop {
         i += 1;
         let props = elves.iter()
-            .map(|&e| {
+            .filter_map(|&e| {
                 if ADJ.iter().any(|c| elves.contains(&(e.0 + c.0, e.1 + c.1))) {
                     for i in 0..4 {
                         let d = (i + dir) % 4;
@@ -157,8 +157,6 @@ pub fn d23_1_2_shorter() {
                 }
                 None
             })
-            .filter(|x| x.is_some())
-            .map(|x| x.unwrap())
             .collect::<Vec<_>>();
 
         if props.is_empty() {
