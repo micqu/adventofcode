@@ -18,9 +18,8 @@ pub fn d22_1() {
     let mut y: i32 = 0;
 
     for cmd in cmds {
-        let p = cmd.parse::<u32>();
-        if p.is_ok() {
-            for _ in 0..p.unwrap() {
+        if let Ok(p) = cmd.parse::<u32>() {
+            for _ in 0..p {
                 let mut nx = x + DIR_X[dir as usize];
                 let mut ny = y + DIR_Y[dir as usize];
 
@@ -166,9 +165,8 @@ pub fn d22_2() {
     let mut y: i32 = 0;
 
     for cmd in cmds.iter() {
-        let p = cmd.parse::<u32>();
-        if p.is_ok() {
-            for _ in 0..p.unwrap() {
+        if let Ok(p) = cmd.parse::<u32>() {
+            for _ in 0..p {
                 let current_side_idx = get_side_idx(x, y, side_len, w);
                 let side = sides[&current_side_idx];
 
