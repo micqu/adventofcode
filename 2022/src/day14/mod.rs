@@ -111,25 +111,9 @@ fn parse(file: &str) -> Vec::<Vec<u8>> {
                 .windows(2)
                 .for_each(|x| {
                     let dx = x[1].0 - x[0].0;
-                    if dx > 0 {
-                        for i in 0..=dx {
-                            s[x[0].1 as usize][(x[0].0 + i) as usize] = 1;
-                        }
-                    } else {
-                        for i in (0..=-dx).rev() {
-                            s[x[0].1 as usize][(x[0].0 - i) as usize] = 1;
-                        }
-                    }
                     let dy = x[1].1 - x[0].1;
-                    if dy > 0 {
-                        for i in 0..=dy {
-                            s[(x[0].1 + i) as usize][x[0].0 as usize] = 1;
-                        }
-                    } else {
-                        for i in (0..=-dy).rev() {
-                            s[(x[0].1 - i) as usize][x[0].0 as usize] = 1;
-                        }
-                    }
+                    (0..=dx.abs()).for_each(|i| s[x[0].1 as usize][(x[0].0 + i * dx.signum()) as usize] = 1);
+                    (0..=dy.abs()).for_each(|i| s[(x[0].1 + i * dy.signum()) as usize][x[0].0 as usize] = 1);
                 });
         });
     s
