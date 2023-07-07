@@ -40,7 +40,7 @@ pub fn d7_1() {
             break;
         }
     }
-    println!("{:?}", signals["a"].val);
+    println!("{:?}", signals["a"].val.unwrap());
 }
 
 pub fn d7_2() {
@@ -79,7 +79,7 @@ pub fn d7_2() {
             break;
         }
     }
-    println!("{:?}", signals["a"].val);
+    println!("{:?}", signals["a"].val.unwrap());
 }
 
 fn set_val(signal: &mut Signal) {

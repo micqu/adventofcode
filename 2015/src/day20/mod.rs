@@ -6,8 +6,32 @@ use reikna::{
 };
 
 pub fn d20() {
-    d20_1();
-    d20_2();
+    d20_1_fast();
+    d20_2_fast();
+}
+
+pub fn d20_1_fast() {
+    let n = 36000000;
+    let mut h = vec![0; n / 10 + 1];
+    for i in 1..=n / 10 {
+        for j in (i..=n / 10).step_by(i) {
+            h[j] += i * 10;
+        }
+    }
+    let house = h.iter().position(|x| *x >= n);
+    println!("{}", house.unwrap());
+}
+
+pub fn d20_2_fast() {
+    let n = 36000000;
+    let mut h = vec![0; n / 10 + 1];
+    for i in 1..=n / 10 {
+        for j in (i..=n / 10).step_by(i).take(50) {
+            h[j] += i * 11;
+        }
+    }
+    let house = h.iter().position(|x| *x >= n);
+    println!("{}", house.unwrap());
 }
 
 pub fn d20_1() {
