@@ -8,12 +8,9 @@ pub fn d25_1() {
     let c = 3083;
 
     let idx = get_idx(c, r) - 1;
-    
-    let mut n = a;
-    for _ in 0..idx {
-        n = f(n);
-    }
-    println!("{}", n);
+
+    let result = (0..idx).fold(a, |a, _| f(a));
+    println!("{}", result);
 }
 
 fn get_idx(x: u32, y: u32) -> u32 {

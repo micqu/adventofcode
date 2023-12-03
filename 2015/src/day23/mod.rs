@@ -50,27 +50,12 @@ fn parse(file: &str) -> Vec<Instruction> {
     for line in buffer.lines() {
         let tokens: Vec<_> = line.trim().split(&[' ', ',', '+']).filter(|x| !x.is_empty()).collect();
         match tokens[0] {
-            "hlf" => {
-                instructions.push(Instruction::Hlf(char_to_int(tokens[1].chars().next().unwrap())));
-            },
-            "tpl" => {
-                instructions.push(Instruction::Tpl(char_to_int(tokens[1].chars().next().unwrap())));
-            },
-            "inc" => {
-                instructions.push(Instruction::Inc(char_to_int(tokens[1].chars().next().unwrap())));
-            },
-            "jmp" => {
-                let a = tokens[1].parse::<i32>().unwrap();
-                instructions.push(Instruction::Jmp(a));
-            },
-            "jie" => {
-                let b = tokens[2].parse().unwrap();
-                instructions.push(Instruction::Jie(char_to_int(tokens[1].chars().next().unwrap()), b));
-            },
-            "jio" => {
-                let b = tokens[2].parse().unwrap();
-                instructions.push(Instruction::Jio(char_to_int(tokens[1].chars().next().unwrap()), b));
-            },
+            "hlf" => instructions.push(Instruction::Hlf(char_to_int(tokens[1].chars().next().unwrap()))),
+            "tpl" => instructions.push(Instruction::Tpl(char_to_int(tokens[1].chars().next().unwrap()))),
+            "inc" => instructions.push(Instruction::Inc(char_to_int(tokens[1].chars().next().unwrap()))),
+            "jmp" => instructions.push(Instruction::Jmp(tokens[1].parse::<i32>().unwrap())),
+            "jie" => instructions.push(Instruction::Jie(char_to_int(tokens[1].chars().next().unwrap()), tokens[2].parse().unwrap())),
+            "jio" => instructions.push(Instruction::Jio(char_to_int(tokens[1].chars().next().unwrap()), tokens[2].parse().unwrap())),
             _ => panic!(),
         };
     }

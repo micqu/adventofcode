@@ -2,9 +2,6 @@
 
 use std::time::SystemTime;
 
-mod day7;
-mod day8;
-mod day9;
 mod day10;
 mod day11;
 mod day12;
@@ -21,6 +18,9 @@ mod day22;
 mod day23;
 mod day24;
 mod day25;
+mod day7;
+mod day8;
+mod day9;
 mod utils;
 
 fn main() {
@@ -43,8 +43,8 @@ fn main() {
     // day21::d21();
     // day22::d22();
     // day23::d23();
-    day24::d24();
-    // day25::d25();
+    // day24::d24();
+    day25::d25();
 
     println!("\nTotal time: {:?}", start.elapsed().unwrap());
 }

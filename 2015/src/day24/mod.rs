@@ -22,7 +22,7 @@ fn solve(v: &Vec<u64>, target: u64) -> Option<u64> {
                 groups_qe.push(pair.iter().product());
             }
         }
-
+        
         groups_qe.sort_unstable();
         
         if let Some(s) = groups_qe.first() {
