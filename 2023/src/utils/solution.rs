@@ -66,3 +66,37 @@ impl From<&str> for Solution {
         Self::Str(sol.to_owned())
     }
 }
+
+pub trait IntoSolution<W> {
+    fn solution(self) -> W;
+}
+
+macro_rules! into_solution {
+    ($type_:ident) => {
+        impl IntoSolution<Option<Solution>> for $type_ {
+            fn solution(self) -> Option<Solution> {
+                Some(self.into())
+            }
+        }
+    }
+}
+
+into_solution!(i8);
+into_solution!(i16);
+into_solution!(i32);
+into_solution!(i64);
+into_solution!(i128);
+into_solution!(isize);
+into_solution!(u8);
+into_solution!(u16);
+into_solution!(u32);
+into_solution!(u64);
+into_solution!(u128);
+into_solution!(usize);
+into_solution!(String);
+
+impl IntoSolution<Option<Solution>> for &str {
+    fn solution(self) -> Option<Solution> {
+        Some(self.into())
+    }
+}

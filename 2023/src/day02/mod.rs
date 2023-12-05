@@ -1,9 +1,9 @@
-use crate::utils::solution::Solution;
+use crate::utils::solution::{Solution, IntoSolution};
 
 const INPUT: &'static str = include_str!("input.txt");
 
 pub fn part1() -> Option<Solution> {
-    let s: usize = INPUT.lines().enumerate().map(|(id, line)| {
+    INPUT.lines().enumerate().map(|(id, line)| {
         let mut splits = line.split(&[',', ';', ':', ' ']).skip(2);
         while let Some(split) = splits.next() {
             if let Ok(n) = split.parse::<usize>() {
@@ -18,29 +18,25 @@ pub fn part1() -> Option<Solution> {
         }
         
         id + 1
-    }).sum();
-    
-    Some(s.into())
+    }).sum::<usize>().solution()
 }
 
 pub fn part2() -> Option<Solution> {
-    let s: usize = INPUT.lines().map(|line| {
-        let (mut sr, mut sg, mut sb) = (0, 0, 0);
+    INPUT.lines().map(|line| {
+        let (mut r, mut g, mut b) = (0, 0, 0);
         let mut splits = line.split(&[',', ';', ':', ' ']).skip(2);
         while let Some(s) = splits.next() {
             if let Ok(n) = s.parse::<usize>() {
-                let b = splits.next().unwrap();
-                match b.chars().nth(0).unwrap() {
-                    'r' => sr = sr.max(n),
-                    'g' => sg = sg.max(n),
-                    'b' => sb = sb.max(n),
+                let c = splits.next().unwrap();
+                match c.chars().nth(0).unwrap() {
+                    'r' => r = r.max(n),
+                    'g' => g = g.max(n),
+                    'b' => b = b.max(n),
                     _ => panic!(),
                 }
             }
         }
 
-        sr * sg * sb
-    }).sum();
-
-    Some(s.into())
+        r * g * b
+    }).sum::<usize>().solution()
 }

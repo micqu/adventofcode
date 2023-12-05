@@ -1,9 +1,9 @@
-use crate::utils::solution::Solution;
+use crate::utils::solution::{Solution, IntoSolution};
 
 const INPUT: &'static str = include_str!("input.txt");
 
 pub fn part1() -> Option<Solution> {
-    let s = INPUT.lines().map(|line| {
+    INPUT.lines().map(|line| {
         let mut first = 0;
         let mut last = 0;
 
@@ -22,13 +22,11 @@ pub fn part1() -> Option<Solution> {
         }
 
         first * 10 + last
-    }).sum::<u32>();
-    
-    Some(s.into())
+    }).sum::<u32>().solution()
 }
 
 pub fn part2() -> Option<Solution> {
-    let s = INPUT.lines().map(|line| {
+    INPUT.lines().map(|line| {
         let mut first = 0;
         let mut last = 0;
         
@@ -67,9 +65,7 @@ pub fn part2() -> Option<Solution> {
         }
 
         first * 10 + last
-    }).sum::<u32>();
-
-    Some(s.into())
+    }).sum::<u32>().solution()
 }
 
 const NUMBERS: [&str; 9] = [

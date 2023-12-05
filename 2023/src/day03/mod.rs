@@ -1,6 +1,6 @@
 use itertools::Itertools;
 
-use crate::utils::{solution::Solution, ADJ_EIGHT};
+use crate::utils::{solution::{Solution, IntoSolution}, ADJ_EIGHT};
 
 const INPUT: &'static str = include_str!("input.txt");
 
@@ -51,7 +51,7 @@ pub fn part1() -> Option<Solution> {
         }
     }
 
-    Some(s.into())
+    s.solution()
 }
 
 pub fn part2() -> Option<Solution> {
@@ -69,7 +69,7 @@ pub fn part2() -> Option<Solution> {
         }
     }
 
-    Some(s.into())
+    s.solution()
 }
 
 fn calculate_gear_ratio(x: usize, y: usize, w: usize, h: usize, map: &Vec<char>) -> Option<u32> {
