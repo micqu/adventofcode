@@ -14,6 +14,8 @@ pub enum Solution {
     U64(u64),
     U128(u128),
     Usize(usize),
+    F32(f32),
+    F64(f64),
     Str(String),
 }
 
@@ -32,6 +34,8 @@ impl Display for Solution {
             Self::U64(x) => x.fmt(f),
             Self::U128(x) => x.fmt(f),
             Self::Usize(x) => x.fmt(f),
+            Self::F32(x) => x.fmt(f),
+            Self::F64(x) => x.fmt(f),
             Self::Str(x) => x.fmt(f),
         }
     }
@@ -59,6 +63,8 @@ impl_from!(u32, U32);
 impl_from!(u64, U64);
 impl_from!(u128, U128);
 impl_from!(usize, Usize);
+impl_from!(f32, F32);
+impl_from!(f64, F64);
 impl_from!(String, Str);
 
 impl From<&str> for Solution {
@@ -93,6 +99,8 @@ into_solution!(u32);
 into_solution!(u64);
 into_solution!(u128);
 into_solution!(usize);
+into_solution!(f32);
+into_solution!(f64);
 into_solution!(String);
 
 impl IntoSolution<Option<Solution>> for &str {

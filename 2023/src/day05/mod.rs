@@ -124,3 +124,26 @@ impl Mapping {
         None
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    
+    #[test]
+    fn part1() {
+        let result = super::part1().unwrap();
+        match result {
+            Solution::I64(a) => assert_eq!(a, 240320250),
+            _ => panic!(),
+        }
+    }
+
+    #[test]
+    fn part2() {
+        let result = super::part2().unwrap();
+        match result {
+            Solution::I64(a) => assert_eq!(a, 28580589),
+            _ => panic!(),
+        }
+    }
+}

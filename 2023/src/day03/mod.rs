@@ -105,15 +105,15 @@ fn calculate_gear_ratio(x: usize, y: usize, w: usize, h: usize, map: &Vec<char>)
 }
 
 fn expand(x: usize, y: usize, w: usize, map: &Vec<char>) -> u32 {
-    let mut start = 0;
-    for i in (0..=x).rev() {
-        if map[y * w + i].is_ascii_digit() {
-            start = i;
+    let mut start = x;
+    while start > 0 {
+        if map[y * w + start - 1].is_ascii_digit() {
+            start -= 1;
         } else {
             break;
         }
     }
-
+    
     let mut n = 0;
     for i in start..w - 1 {
         if let Some(digit) = map[y * w + i].to_digit(10) {
@@ -122,6 +122,29 @@ fn expand(x: usize, y: usize, w: usize, map: &Vec<char>) -> u32 {
             break;
         }
     }
-
+    
     n
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    
+    #[test]
+    fn part1() {
+        let result = super::part1().unwrap();
+        match result {
+            Solution::U32(a) => assert_eq!(a, 526404),
+            _ => panic!(),
+        }
+    }
+
+    #[test]
+    fn part2() {
+        let result = super::part2().unwrap();
+        match result {
+            Solution::U32(a) => assert_eq!(a, 84399773),
+            _ => panic!(),
+        }
+    }
 }

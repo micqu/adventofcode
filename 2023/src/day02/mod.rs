@@ -40,3 +40,26 @@ pub fn part2() -> Option<Solution> {
         r * g * b
     }).sum::<usize>().solution()
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    
+    #[test]
+    fn part1() {
+        let result = super::part1().unwrap();
+        match result {
+            Solution::Usize(a) => assert_eq!(a, 1867),
+            _ => panic!(),
+        }
+    }
+
+    #[test]
+    fn part2() {
+        let result = super::part2().unwrap();
+        match result {
+            Solution::Usize(a) => assert_eq!(a, 84538),
+            _ => panic!(),
+        }
+    }
+}

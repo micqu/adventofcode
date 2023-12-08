@@ -63,3 +63,26 @@ pub fn part2() -> Option<Solution> {
         count[i]
     }).sum::<u32>().solution()
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    
+    #[test]
+    fn part1() {
+        let result = super::part1().unwrap();
+        match result {
+            Solution::U32(a) => assert_eq!(a, 26914),
+            _ => panic!(),
+        }
+    }
+
+    #[test]
+    fn part2() {
+        let result = super::part2().unwrap();
+        match result {
+            Solution::U32(a) => assert_eq!(a, 13080971),
+            _ => panic!(),
+        }
+    }
+}

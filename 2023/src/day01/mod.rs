@@ -38,8 +38,8 @@ pub fn part2() -> Option<Solution> {
             }
             
             if let Some(ch) = chars.next() {
-                if ch.is_ascii_digit() {
-                    first = ch.to_digit(10).unwrap();
+                if let Some(digit) = ch.to_digit(10) {
+                    first = digit;
                     break;
                 }
             } else {
@@ -55,8 +55,8 @@ pub fn part2() -> Option<Solution> {
             }
 
             if let Some(ch) = chars.next_back() {
-                if ch.is_ascii_digit() {
-                    last = ch.to_digit(10).unwrap();
+                if let Some(digit) = ch.to_digit(10) {
+                    last = digit;
                     break;
                 }
             } else {

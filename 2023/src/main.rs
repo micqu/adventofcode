@@ -44,12 +44,10 @@ fn main() {
     let days_sorted = sort_days(&mut days);
 
     let mut total_runtime = Duration::new(0, 0);
-
     for (day, parts) in days_sorted {
         let mut contains_solution = false;
-        
         let mut day_runtime = Duration::new(0, 0);
-        
+
         for part in parts {
             let part_solver = get_solvers(day.0);
             let part_runtime = Instant::now();
@@ -65,6 +63,7 @@ fn main() {
                 day_runtime += elapsed;
             }
         }
+        
         if contains_solution {
             println!("  . Elapsed: {:.4?} ms", day_runtime.as_nanos() as f64 / 1_000_000.0);
         }
