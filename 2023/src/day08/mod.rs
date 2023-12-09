@@ -1,6 +1,7 @@
 use std::{collections::HashMap, str::{Bytes, Lines}};
 
-use num::Integer;
+use itertools::Itertools;
+use num::integer::lcm;
 
 use crate::utils::solution::{Solution, IntoSolution};
 
@@ -12,25 +13,21 @@ pub fn part1() -> Option<Solution> {
 
     let g = get_node_number2(b'Z', b'Z', b'Z');
     let mut c = get_node_number2(b'A', b'A', b'A');
-    let mut done = false;
     let mut i: u32 = 0;
-    while !done {
-        for inst in insts.iter() {
-            let next = get_node(map[c as usize]);
+    for inst in insts.iter().cycle() {
+        let next = get_node(map[c as usize]);
 
-            if next.0 == g {
-                done = true;
-                break;
-            }
-
-            match inst {
-                b'L' => c = next.1,
-                b'R' => c = next.2,
-                _ => panic!(),
-            }
-
-            i += 1;
+        if next.0 == g {
+            break;
         }
+
+        c = match inst {
+            b'L' => next.1,
+            b'R' => next.2,
+            _ => panic!(),
+        };
+
+        i += 1;
     }
 
     i.solution()
@@ -39,95 +36,20 @@ pub fn part1() -> Option<Solution> {
 pub fn part2() -> Option<Solution> {
     let mut lines = INPUT.lines();
     let (insts, map) = parse(&mut lines);
+    let cs = map.keys().filter(|x| **x as u8 == b'A').map(|x| *x).collect_vec();
     
-    let mut cs = Vec::<(u64, Option<u64>)>::new();
-    for id in map.keys() {
-        if *id as u8 == b'A' {
-            cs.push((*id, None));
-        }
-    }
-
-    let mut done = false;
-    let mut s = 0;
-    let mut n_len_found = 0;
-    while !done {
-        for inst in insts.iter() {
-            done = n_len_found == cs.len();
-            if done {
-                break;
-            }
-
-            for (c, l) in cs.iter_mut() {
-                if l.is_some() {
-                    continue;
-                }
-                
-                if *c as u8 == b'Z' {
-                    *l = Some(s);
-                    n_len_found += 1;
-                } else {
-                    let next = map.get(&c).unwrap();
-                    *c = match inst {
-                        b'L' => next.left,
-                        b'R' => next.right,
-                        _ => panic!(),
-                    };
-                }
-            }
-
-            s += 1;
-        }
-    }
-    
-    cs.iter().fold(1, |a, (_, b)| a.lcm(&b.unwrap())).solution()
+    cs.iter().map(|c| {
+        insts.iter().cycle().scan(c, |c, step| {
+            let next = map.get(&c).unwrap();
+            *c = match step {
+                b'L' => &next.left,
+                b'R' => &next.right,
+                _ => panic!(),
+            };
+            Some(**c as u8 == b'Z')
+        }).position(|c| c).unwrap() + 1
+    }).fold(1, lcm).solution()
 }
-
-// pub fn part2() -> Option<Solution> {
-//     let mut lines = INPUT.lines();
-//     let (insts, map) = parse2(&mut lines);
-    
-//     let mut cs = Vec::<(u16, Option<u64>)>::new();
-//     for &node in map.iter() {
-//         let n = get_node(node);
-//         if decompose_node_id(n.0).2 == 0 {
-//             cs.push((n.0, None));
-//         }
-//     }
-
-//     let mut done = false;
-//     let mut s = 0;
-//     let mut n_len_found = 0;
-//     while !done {
-//         for inst in insts.iter() {
-//             done = n_len_found == cs.len();
-//             if done {
-//                 break;
-//             }
-
-//             for (c, l) in cs.iter_mut() {
-//                 if l.is_some() {
-//                     continue;
-//                 }
-                
-//                 if decompose_node_id(*c).2 == 25 {
-//                     *l = Some(s);
-//                     n_len_found += 1;
-//                 } else {
-//                     let next = get_node(map[*c as usize]);
-//                     *c = match inst {
-//                         b'L' => next.1,
-//                         b'R' => next.2,
-//                         _ => panic!(),
-//                     };
-//                 }
-//             }
-
-//             s += 1;
-//         }
-//     }
-    
-//     cs.iter().fold(1, |a, (_, b)| a.lcm(&b.unwrap())).solution()
-// }
 
 fn parse(lines: &mut Lines) -> (Vec<u8>, HashMap<u64, Node>) {
     let insts: Vec<u8> = lines.next().unwrap().bytes().collect();

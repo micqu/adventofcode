@@ -27,7 +27,7 @@ where
     value
 }
 
-macro_rules! parse_number {
+macro_rules! parse_positive_number {
     ($name:tt, $type:ident) => {
         pub fn $name<T>(input: &mut T) -> Option<$type>
         where
@@ -51,5 +51,42 @@ macro_rules! parse_number {
     }
 }
 
-parse_number!(parse_u64, u64);
-parse_number!(parse_u128, u128);
+parse_positive_number!(parse_u64, u64);
+parse_positive_number!(parse_u128, u128);
+
+macro_rules! parse_number {
+    ($name:tt, $type:ident) => {
+        pub fn $name<T>(input: &mut T) -> Option<$type>
+        where
+            T: Iterator<Item = char>,
+        {
+            let mut negative = false;
+            let mut value: Option<$type> = None;
+            for char in input {
+                if let Some(digit) = char.to_digit(10) {
+                    if let Some(current) = value {
+                        value = Some(current * 10 + digit as $type);
+                    } else {
+                        value = Some(digit as $type);
+                    }
+                } else if char == '-' {
+                    negative = true;
+                } else if let Some(current) = value {
+                    if negative {
+                        return Some(-current);
+                    }
+                    return value;
+                }
+            }
+        
+            if negative {
+                if let Some(current) = value {
+                    return Some(-current);
+                }
+            }
+            value
+        }
+    }
+}
+
+parse_number!(parse_i64, i64);
