@@ -120,11 +120,9 @@ enum Direction {
 
 // Shoelace
 fn area(tiles: &Vec<Position>) -> usize {
-    let mut a = 0;
-    for i in 0..tiles.len() {
-        a += det(&tiles[i], &tiles[(i + 1) % tiles.len()]);
-    }
-    a.abs() as usize / 2
+    (0..tiles.len())
+        .map(|i| det(&tiles[i], &tiles[(i + 1) % tiles.len()]))
+        .sum::<isize>() as usize / 2
 }
 
 fn det(a: &Position, b: &Position) -> isize {
