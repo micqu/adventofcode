@@ -1,5 +1,3 @@
-use core::panic;
-
 use itertools::Itertools;
 
 use crate::utils::solution::{Solution, IntoSolution};
@@ -127,4 +125,27 @@ fn area(tiles: &Vec<Position>) -> usize {
 
 fn det(a: &Position, b: &Position) -> isize {
     a.x * b.y - b.x * a.y
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    
+    #[test]
+    fn part1() {
+        let result = super::part1().unwrap();
+        match result {
+            Solution::Usize(a) => assert_eq!(a, 6812),
+            _ => panic!(),
+        }
+    }
+
+    #[test]
+    fn part2() {
+        let result = super::part2().unwrap();
+        match result {
+            Solution::Usize(a) => assert_eq!(a, 527),
+            _ => panic!(),
+        }
+    }
 }

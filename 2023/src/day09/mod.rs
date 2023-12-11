@@ -97,7 +97,7 @@ mod tests {
     fn part1() {
         let result = super::part1().unwrap();
         match result {
-            Solution::I64(a) => assert_eq!(a, 1798691765),
+            Solution::F64(a) => assert_eq!(a, 1798691765.0),
             _ => panic!(),
         }
     }
@@ -106,7 +106,7 @@ mod tests {
     fn part2() {
         let result = super::part2().unwrap();
         match result {
-            Solution::I64(a) => assert_eq!(a, 1104),
+            Solution::F64(a) => assert_eq!(a, 1104.0),
             _ => panic!(),
         }
     }

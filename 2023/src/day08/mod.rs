@@ -149,7 +149,7 @@ mod tests {
     fn part2() {
         let result = super::part2().unwrap();
         match result {
-            Solution::U64(a) => assert_eq!(a, 15746133679061),
+            Solution::Usize(a) => assert_eq!(a, 15746133679061),
             _ => panic!(),
         }
     }
