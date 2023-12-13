@@ -2,6 +2,7 @@ use itertools::Itertools;
 
 use crate::utils::{solution::{Solution, IntoSolution}, ADJ_EIGHT};
 
+pub const TITLE: &str = "Gear Ratios";
 const INPUT: &'static str = include_str!("input.txt");
 
 pub fn part1() -> Option<Solution> {

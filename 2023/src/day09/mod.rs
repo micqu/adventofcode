@@ -1,22 +1,33 @@
 use itertools::Itertools;
 
-use crate::utils::{solution::{Solution, IntoSolution}, parse_i64};
+use crate::utils::{
+    solution::{IntoSolution, Solution},
+    Parsable,
+};
 
+pub const TITLE: &str = "Mirage Maintenance";
 const INPUT: &'static str = include_str!("input.txt");
 
 pub fn part1() -> Option<Solution> {
-    INPUT.lines().map(|line| {
-        let mut chs = line.chars();
+    INPUT
+        .lines()
+        .map(|line| {
+            let mut chs = line.bytes();
+            let mut f = Vec::<Point>::new();
+            let mut i = 0;
+            while let Some(n) = Parsable::<i64>::next_number(&mut chs) {
+                f.push(Point {
+                    x: i as f64,
+                    y: n as f64,
+                });
+                i += 1;
+            }
 
-        let mut f = Vec::<Point>::new();
-        let mut i = 0;
-        while let Some(n) = parse_i64(&mut chs) {
-            f.push(Point { x: i as f64, y: n as f64 });
-            i += 1;
-        }
-
-        interpolate(&f, f.len() as f64)
-    }).sum::<f64>().round().solution()
+            interpolate(&f, f.len() as f64)
+        })
+        .sum::<f64>()
+        .round()
+        .solution()
 
     // INPUT.lines().map(|line| {
     //     let mut chs = line.chars();
@@ -30,18 +41,26 @@ pub fn part1() -> Option<Solution> {
 }
 
 pub fn part2() -> Option<Solution> {
-    INPUT.lines().map(|line| {
-        let mut chs = line.chars();
+    INPUT
+        .lines()
+        .map(|line| {
+            let mut chs = line.bytes();
 
-        let mut f = Vec::<Point>::new();
-        let mut i = 0;
-        while let Some(n) = parse_i64(&mut chs) {
-            f.push(Point { x: i as f64, y: n as f64 });
-            i += 1;
-        }
+            let mut f = Vec::<Point>::new();
+            let mut i = 0;
+            while let Some(n) = Parsable::<i64>::next_number(&mut chs) {
+                f.push(Point {
+                    x: i as f64,
+                    y: n as f64,
+                });
+                i += 1;
+            }
 
-        interpolate(&f, -1.)
-    }).sum::<f64>().round().solution()
+            interpolate(&f, -1.)
+        })
+        .sum::<f64>()
+        .round()
+        .solution()
 
     // INPUT.lines().map(|line| {
     //     let mut chs = line.chars();
@@ -92,7 +111,7 @@ fn interpolate(f: &Vec<Point>, x: f64) -> f64 {
 #[cfg(test)]
 mod tests {
     use super::*;
-    
+
     #[test]
     fn part1() {
         let result = super::part1().unwrap();

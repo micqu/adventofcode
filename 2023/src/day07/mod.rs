@@ -2,6 +2,7 @@ use itertools::Itertools;
 
 use crate::utils::solution::{Solution, IntoSolution};
 
+pub const TITLE: &str = "Camel Cards";
 const INPUT: &'static str = include_str!("input.txt");
 const CARDS: [char; 13] = ['A', 'K', 'Q', 'J', 'T', '9', '8', '7', '6', '5', '4', '3', '2'];
 const CARDS2: [char; 13] = ['A', 'K', 'Q', 'T', '9', '8', '7', '6', '5', '4', '3', '2', 'J'];

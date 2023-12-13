@@ -54,39 +54,153 @@ macro_rules! parse_positive_number {
 parse_positive_number!(parse_u64, u64);
 parse_positive_number!(parse_u128, u128);
 
-macro_rules! parse_number {
-    ($name:tt, $type:ident) => {
-        pub fn $name<T>(input: &mut T) -> Option<$type>
-        where
-            T: Iterator<Item = char>,
-        {
-            let mut negative = false;
-            let mut value: Option<$type> = None;
-            for char in input {
-                if let Some(digit) = char.to_digit(10) {
-                    if let Some(current) = value {
-                        value = Some(current * 10 + digit as $type);
-                    } else {
-                        value = Some(digit as $type);
-                    }
-                } else if char == '-' {
-                    negative = true;
-                } else if let Some(current) = value {
-                    if negative {
-                        return Some(-current);
-                    }
-                    return value;
-                }
-            }
+// macro_rules! parse_number {
+//     ($name:tt, $type:ident) => {
+//         pub fn $name<T>(input: &mut T) -> Option<$type>
+//         where
+//             T: Iterator<Item = char>,
+//         {
+//             let mut negative = false;
+//             let mut value: Option<$type> = None;
+//             for char in input {
+//                 if let Some(digit) = char.to_digit(10) {
+//                     if let Some(current) = value {
+//                         value = Some(current * 10 + digit as $type);
+//                     } else {
+//                         value = Some(digit as $type);
+//                     }
+//                 } else if char == '-' {
+//                     negative = true;
+//                 } else if let Some(current) = value {
+//                     if negative {
+//                         return Some(-current);
+//                     }
+//                     return value;
+//                 }
+//             }
         
-            if negative {
-                if let Some(current) = value {
-                    return Some(-current);
-                }
-            }
-            value
+//             if negative {
+//                 if let Some(current) = value {
+//                     return Some(-current);
+//                 }
+//             }
+//             value
+//         }
+//     }
+// }
+
+// parse_number!(parse_i64, i64);
+
+pub trait ToDigit {
+    fn to_digit(&self) -> Option<u8>;
+}
+
+impl ToDigit for u8 {
+    fn to_digit(&self) -> Option<u8> {
+        if self.is_ascii_digit() {
+            return Some(*self - b'0');
         }
+        None
     }
 }
 
-parse_number!(parse_i64, i64);
+pub trait Parsable<T>: Iterator {
+    fn next_number(&mut self) -> Option<T>;
+}
+
+macro_rules! parsable_number {
+    ($type:ident) => {
+        impl<T: Iterator<Item = u8>> Parsable<$type> for T {
+            fn next_number(&mut self) -> Option<$type> {
+                let mut value: Option<$type> = None;
+                for byte in self {
+                    if let Some(digit) = byte.to_digit() {
+                        if let Some(current) = value {
+                            value = Some(current * 10 + digit as $type);
+                        } else {
+                            value = Some(digit as $type);
+                        }
+                    } else if value.is_some() {
+                        return value;
+                    }
+                }
+
+                value
+            }
+        }
+    };
+}
+
+macro_rules! parsable_negative_number {
+    ($type:ident) => {
+        impl<T: Iterator<Item = u8>> Parsable<$type> for T {
+            fn next_number(&mut self) -> Option<$type> {
+                let mut negative = false;
+                let mut value: Option<$type> = None;
+                for byte in self {
+                    if let Some(digit) = byte.to_digit() {
+                        if let Some(current) = value {
+                            value = Some(current * 10 + digit as $type);
+                        } else {
+                            value = Some(digit as $type);
+                        }
+                    } else if let Some(value) = value {
+                        if negative {
+                            return Some(-value);
+                        }
+                        return Some(value);
+                    } else if byte == b'-' {
+                        negative = true;
+                    } else {
+                        negative = false;
+                    }
+                }
+
+                if let Some(value) = value {
+                    if negative {
+                        return Some(-value);
+                    }
+                    return Some(value);
+                }
+                None
+            }
+        }
+    };
+}
+
+parsable_number!(u32);
+parsable_number!(u64);
+parsable_number!(u128);
+parsable_number!(usize);
+parsable_negative_number!(i32);
+parsable_negative_number!(i64);
+parsable_negative_number!(i128);
+parsable_negative_number!(isize);
+
+pub trait ToNumbers<T> {
+    fn to_numbers(&self) -> Vec<T>;
+}
+
+impl ToNumbers<isize> for &str
+{
+    fn to_numbers(&self) -> Vec<isize> {
+        let mut v = self.bytes();
+        let mut ns = Vec::new();
+        while let Some(n) = Parsable::<isize>::next_number(&mut v) {
+            ns.push(n);
+        }
+        ns
+    }
+}
+
+impl ToNumbers<usize> for &str
+{
+    fn to_numbers(&self) -> Vec<usize> {
+        let mut v = self.bytes();
+        let mut ns = Vec::new();
+        while let Some(n) = Parsable::<usize>::next_number(&mut v) {
+            ns.push(n);
+        }
+        ns
+    }
+}

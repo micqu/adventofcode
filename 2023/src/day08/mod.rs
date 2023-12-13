@@ -5,6 +5,7 @@ use num::integer::lcm;
 
 use crate::utils::solution::{Solution, IntoSolution};
 
+pub const TITLE: &str = "Haunted Wasteland";
 const INPUT: &'static str = include_str!("input.txt");
 
 pub fn part1() -> Option<Solution> {

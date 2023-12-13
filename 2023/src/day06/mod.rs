@@ -1,5 +1,6 @@
 use crate::utils::{solution::{Solution, IntoSolution}, parse_u64};
 
+pub const TITLE: &str = "Wait For It";
 const INPUT: &'static str = include_str!("input.txt");
 
 pub fn part1() -> Option<Solution> {

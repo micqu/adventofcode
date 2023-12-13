@@ -49,12 +49,12 @@ fn main() {
         let mut day_runtime = Duration::new(0, 0);
 
         for part in parts {
-            let part_solver = get_solvers(day.0);
+            let (part_solver, title) = get_solvers(day.0);
             let part_runtime = Instant::now();
 
             if let Some(s) = part_solver[part.0]() {
                 if !contains_solution {
-                    println!("\n=== Day {:02} ===", day.0);
+                    println!("\n=== Day {:02}  {} ===", day.0, title);
                     contains_solution = true;
                 }
 
@@ -117,33 +117,33 @@ fn sort_days(days: &mut HashMap<Day, HashSet<Part>>) -> Vec<(&Day, Vec<&Part>)> 
     days_sorted
 }
 
-fn get_solvers(day: usize) -> &'static [fn() -> Option<Solution>] {
+fn get_solvers(day: usize) -> (&'static [fn() -> Option<Solution>], &'static str) {
     match day {
-        1 => &[day01::part1, day01::part2],
-        2 => &[day02::part1, day02::part2],
-        3 => &[day03::part1, day03::part2],
-        4 => &[day04::part1, day04::part2],
-        5 => &[day05::part1, day05::part2],
-        6 => &[day06::part1, day06::part2],
-        7 => &[day07::part1, day07::part2],
-        8 => &[day08::part1, day08::part2],
-        9 => &[day09::part1, day09::part2],
-        10 => &[day10::part1, day10::part2],
-        11 => &[day11::part1, day11::part2],
-        12 => &[day12::part1, day12::part2],
-        13 => &[day13::part1, day13::part2],
-        14 => &[day14::part1, day14::part2],
-        15 => &[day15::part1, day15::part2],
-        16 => &[day16::part1, day16::part2],
-        17 => &[day17::part1, day17::part2],
-        18 => &[day18::part1, day18::part2],
-        19 => &[day19::part1, day19::part2],
-        20 => &[day20::part1, day20::part2],
-        21 => &[day21::part1, day21::part2],
-        22 => &[day22::part1, day22::part2],
-        23 => &[day23::part1, day23::part2],
-        24 => &[day24::part1, day24::part2],
-        25 => &[day25::part1, day25::part2],
+        1 => (&[day01::part1, day01::part2], day01::TITLE),
+        2 => (&[day02::part1, day02::part2], day02::TITLE),
+        3 => (&[day03::part1, day03::part2], day03::TITLE),
+        4 => (&[day04::part1, day04::part2], day04::TITLE),
+        5 => (&[day05::part1, day05::part2], day05::TITLE),
+        6 => (&[day06::part1, day06::part2], day06::TITLE),
+        7 => (&[day07::part1, day07::part2], day07::TITLE),
+        8 => (&[day08::part1, day08::part2], day08::TITLE),
+        9 => (&[day09::part1, day09::part2], day09::TITLE),
+        10 => (&[day10::part1, day10::part2], day10::TITLE),
+        11 => (&[day11::part1, day11::part2], day11::TITLE),
+        12 => (&[day12::part1, day12::part2], day12::TITLE),
+        13 => (&[day13::part1, day13::part2], day13::TITLE),
+        14 => (&[day14::part1, day14::part2], day14::TITLE),
+        15 => (&[day15::part1, day15::part2], day15::TITLE),
+        16 => (&[day16::part1, day16::part2], day16::TITLE),
+        17 => (&[day17::part1, day17::part2], day17::TITLE),
+        18 => (&[day18::part1, day18::part2], day18::TITLE),
+        19 => (&[day19::part1, day19::part2], day19::TITLE),
+        20 => (&[day20::part1, day20::part2], day20::TITLE),
+        21 => (&[day21::part1, day21::part2], day21::TITLE),
+        22 => (&[day22::part1, day22::part2], day22::TITLE),
+        23 => (&[day23::part1, day23::part2], day23::TITLE),
+        24 => (&[day24::part1, day24::part2], day24::TITLE),
+        25 => (&[day25::part1, day25::part2], day25::TITLE),
         _ => unimplemented!(),
     }
 }
