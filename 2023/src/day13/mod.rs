@@ -1,5 +1,3 @@
-use itertools::Itertools;
-
 use crate::utils::solution::{IntoSolution, Solution};
 
 pub const TITLE: &str = "Point of Incidence";
@@ -9,30 +7,19 @@ pub fn part1() -> Option<Solution> {
     parse()
         .iter()
         .map(|map| {
-            let h = map.len();
-            let w = map[0].len();
-
-            let mut x_cmax = 0;
-            let mut x = 0;
-            for i in 0..w {
-                let (c, _) = xsplit(i, &map, false);
-                if c > x_cmax {
-                    x_cmax = c;
-                    x = i;
+            for v in 1..map.width() {
+                if check(&map.cols[0..v], &map.cols[v..]) {
+                    return v;
                 }
             }
 
-            let mut y_cmax = 0;
-            let mut y = 0;
-            for i in 0..h {
-                let (c, _) = ysplit(i, &map, false);
-                if c > y_cmax {
-                    y_cmax = c;
-                    y = i;
+            for v in 1..map.height() {
+                if check(&map.rows[0..v], &map.rows[v..]) {
+                    return v * 100;
                 }
             }
 
-            if x_cmax > y_cmax { x } else { y * 100 }
+            0
         })
         .sum::<usize>()
         .solution()
@@ -42,103 +29,130 @@ pub fn part2() -> Option<Solution> {
     parse()
         .iter()
         .map(|map| {
-            let h = map.len();
-            let w = map[0].len();
-            
-            let mut x_cmax = 0;
-            let mut x = 0;
-            for i in 0..w {
-                let (c, has_smudge) = xsplit(i, &map, true);
-                if c > x_cmax && has_smudge {
-                    x_cmax = c;
-                    x = i;
+            for v in 1..map.width() {
+                if check_smudge(&map.cols[0..v], &map.cols[v..], 1) {
+                    return v;
                 }
             }
 
-            let mut y_cmax = 0;
-            let mut y = 0;
-            for i in 0..h {
-                let (c, has_smudge) = ysplit(i, &map, true);
-                if c > y_cmax && has_smudge {
-                    y_cmax = c;
-                    y = i;
+            for v in 1..map.height() {
+                if check_smudge(&map.rows[0..v], &map.rows[v..], 1) {
+                    return v * 100;
                 }
             }
 
-            if x_cmax > y_cmax { x } else { y * 100 }
+            0
         })
         .sum::<usize>()
         .solution()
 }
 
-type Map = Vec<Vec<u8>>;
-
-fn parse() -> Vec<Map> {
-    let mut maps = vec![Map::new()];
+fn parse() -> Vec<Bitmap> {
+    let mut maps = vec![Bitmap::new()];
     for line in INPUT.lines() {
         if line.is_empty() {
-            maps.push(Map::new());
+            maps.push(Bitmap::new());
             continue;
         }
 
-        maps.last_mut().unwrap().push(line.bytes().collect_vec());
+        let map = maps.last_mut().unwrap();
+        let mut row: u32 = 0;
+        for (x, byte) in line.bytes().enumerate() {
+            if map.cols.len() < x + 1 {
+                map.cols.push(0);
+            }
+
+            match byte {
+                b'#' => {
+                    row = (row << 1) | 1;
+                    map.cols[x] = (map.cols[x] << 1) | 1;
+                }
+                b'.' => {
+                    row <<= 1;
+                    map.cols[x] <<= 1;
+                }
+                _ => panic!(),
+            }
+        }
+
+        map.rows.push(row);
     }
 
     maps
 }
 
-fn xsplit(xsplit: usize, map: &Map, mut smudge: bool) -> (u32, bool) {
-    let h = map.len();
-    let w = map[0].len();
-    let mut s = 0;
-    for i in 0..h {
-        for j in xsplit..w {
-            let mj = xsplit as isize - (j - xsplit) as isize - 1;
-
-            if mj < 0 {
-                continue;
+fn check(first: &[u32], last: &[u32]) -> bool {
+    let mut f = first.iter().rev();
+    let mut l = last.iter();
+    while let Some(a) = f.next() {
+        if let Some(b) = l.next() {
+            if a != b {
+                return false;
             }
-
-            if map[i][j] == map[i][mj as usize] {
-                s += 1;
-            } else {
-                if !smudge {
-                    return (0, true);
-                }
-
-                smudge = false;
-            }
+        } else {
+            break;
         }
     }
 
-    (s, !smudge)
+    true
 }
 
-fn ysplit(ysplit: usize, map: &Map, mut smudge: bool) -> (u32, bool) {
-    let h = map.len();
-    let w = map[0].len();
-    let mut s = 0;
-    for i in ysplit..h {
-        let mi = ysplit as isize - (i - ysplit) as isize - 1;
-
-        if mi < 0 {
-            continue;
-        }
-
-        for j in 0..w {
-            if map[i][j] == map[mi as usize][j] {
-                s += 1;
-            } else {
-                if !smudge {
-                    return (0, true);
-                }
-
-                smudge = false;
+fn check_smudge(first: &[u32], last: &[u32], smudges: u32) -> bool {
+    let mut f = first.iter().rev();
+    let mut l = last.iter();
+    let mut used = 0;
+    while let Some(a) = f.next() {
+        if let Some(b) = l.next() {
+            used += (a ^ b).count_ones();
+            if used > smudges {
+                return false;
             }
+        } else {
+            break;
         }
     }
 
-    (s, !smudge)
+    used == smudges
+}
+
+#[derive(Debug)]
+struct Bitmap {
+    rows: Vec<u32>,
+    cols: Vec<u32>,
+}
+
+impl Bitmap {
+    fn new() -> Self {
+        Self {
+            rows: Vec::with_capacity(20),
+            cols: Vec::with_capacity(20),
+        }
+    }
+
+    fn width(&self) -> usize {
+        self.cols.len()
+    }
+
+    fn height(&self) -> usize {
+        self.rows.len()
+    }
+
+    fn at(&self, x: usize, y: usize) -> bool {
+        self.rows[y] & (1 << (self.width() - x - 1)) != 0
+    }
+
+    fn print(&self) {
+        for i in 0..self.height() {
+            for j in 0..self.width() {
+                if self.at(j, i) {
+                    print!("#")
+                } else {
+                    print!(".")
+                }
+            }
+            println!();
+        }
+    }
 }
 
 #[cfg(test)]

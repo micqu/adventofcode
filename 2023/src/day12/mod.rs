@@ -18,7 +18,7 @@ pub fn part1() -> Option<Solution> {
         .map(|line| {
             let (springs, counts) = line.split_once(' ').unwrap();
             let counts = counts.to_numbers();
-            let mut cache = HashMap::<(u32, u32), u64>::new();
+            let mut cache = HashMap::<u16, u64>::new();
             solve(springs.as_bytes(), &counts, 0, 0, &mut cache)
         })
         .sum::<u64>()
@@ -35,7 +35,7 @@ pub fn part2() -> Option<Solution> {
             springs.remove(springs.len() - 1);
             
             let counts = counts.to_numbers().repeat(5);
-            let mut cache = HashMap::<(u32, u32), u64>::new();
+            let mut cache = HashMap::<u16, u64>::new();
             solve(springs.as_bytes(), &counts, 0, 0, &mut cache)
         })
         .sum::<u64>()
@@ -47,9 +47,9 @@ fn mem_wrap(
     counts: &Vec<usize>,
     spring_idx: usize,
     count_idx: usize,
-    mem: &mut HashMap<(u32, u32), u64>,
+    mem: &mut HashMap<u16, u64>,
 ) -> u64 {
-    let h = (spring_idx as u32, count_idx as u32);
+    let h = ((spring_idx as u16) << 8) | count_idx as u16;
     if let Some(v) = mem.get(&h) {
         return *v;
     } else {
@@ -64,7 +64,7 @@ fn solve(
     counts: &Vec<usize>,
     spring_idx: usize,
     count_idx: usize,
-    mem: &mut HashMap<(u32, u32), u64>,
+    mem: &mut HashMap<u16, u64>,
 ) -> u64 {
     if spring_idx >= springs.len() {
         return (count_idx >= counts.len()) as u64;
