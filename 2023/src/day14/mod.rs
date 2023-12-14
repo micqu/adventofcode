@@ -3,15 +3,13 @@ use std::{
     hash::Hasher,
 };
 
-use itertools::Itertools;
-
-use crate::utils::solution::{IntoSolution, Solution};
+use crate::utils::{solution::{IntoSolution, Solution}, vec2d::Vec2d};
 
 pub const TITLE: &str = "Parabolic Reflector Dish";
 const INPUT: &'static str = include_str!("input.txt");
 
 pub fn part1() -> Option<Solution> {
-    parse().up().total_load().solution()
+    parse().tilt_up().total_load().solution()
 }
 
 pub fn part2() -> Option<Solution> {
@@ -44,135 +42,124 @@ pub fn part2() -> Option<Solution> {
     map.total_load().solution()
 }
 
-struct Map {
-    content: Vec<Vec<u8>>,
-    height: usize,
-    width: usize,
+trait ParabolicDish {
+    fn total_load(&self) -> usize;
+    fn cycle(&mut self) -> &mut Self;
+    fn tilt_up(&mut self) -> &mut Self;
+    fn tilt_down(&mut self) -> &mut Self;
+    fn tilt_left(&mut self) -> &mut Self;
+    fn tilt_right(&mut self) -> &mut Self;
+    fn hash(&self) -> u64;
+    fn print(&self);
 }
 
-impl Map {
+impl ParabolicDish for Vec2d<u8> {
     fn total_load(&self) -> usize {
         let mut s = 0;
         for i in 0..self.height {
-            s += bytecount::count(&self.content[i], b'O') * (self.height - i);
+            s += bytecount::count(&self.row(i), b'O') * (self.height - i);
         }
         s
     }
 
-    fn cycle(&mut self) -> &Self {
-        self.up().left().down().right()
+    fn cycle(&mut self) -> &mut Self {
+        self.tilt_up().tilt_left().tilt_down().tilt_right()
     }
 
-    fn up(&mut self) -> &mut Self {
+    fn tilt_up(&mut self) -> &mut Self {
         for x in 0..self.width {
             let mut c = 0;
-            for y in (0..self.height).rev() {
-                match self.content[y][x] {
-                    b'#' => {
-                        for v in (y + 1)..(y + 1 + c) {
-                            self.content[v][x] = b'O';
-                        }
-                        c = 0;
-                    }
-                    b'O' => {
-                        self.content[y][x] = b'.';
-                        c += 1;
-                    }
-                    _ => {}
-                }
-            }
-
-            for v in 0..c {
-                self.content[v][x] = b'O';
-            }
-        }
-        self
-    }
-
-    fn left(&mut self) -> &mut Self {
-        for y in 0..self.height {
-            let mut c = 0;
-            for x in (0..self.width).rev() {
-                match self.content[y][x] {
-                    b'#' => {
-                        for v in (x + 1)..(x + 1 + c) {
-                            self.content[y][v] = b'O';
-                        }
-                        c = 0;
-                    }
-                    b'O' => {
-                        self.content[y][x] = b'.';
-                        c += 1;
-                    }
-                    _ => {}
-                }
-            }
-
-            for v in 0..c {
-                self.content[y][v] = b'O';
-            }
-        }
-        self
-    }
-
-    fn down(&mut self) -> &mut Self {
-        for x in 0..self.width {
-            let mut c = 0;
+            let mut p = 0;
             for y in 0..self.height {
-                match self.content[y][x] {
-                    b'#' => {
-                        for v in (y - c)..y {
-                            self.content[v][x] = b'O';
-                        }
-                        c = 0;
-                    }
+                match self.index(x, y) {
                     b'O' => {
-                        self.content[y][x] = b'.';
+                        *self.index_mut(x, y) = b'.';
+                        *self.index_mut(x, p + c) = b'O';
                         c += 1;
+                    }
+                    b'#' => {
+                        p = y + 1;
+                        c = 0;
                     }
                     _ => {}
                 }
-            }
-
-            for v in self.height - c..self.height {
-                self.content[v][x] = b'O';
             }
         }
         self
     }
 
-    fn right(&mut self) -> &mut Self {
+    fn tilt_left(&mut self) -> &mut Self {
         for y in 0..self.height {
             let mut c = 0;
+            let mut p = 0;
             for x in 0..self.width {
-                match self.content[y][x] {
-                    b'#' => {
-                        for v in (x - c)..x {
-                            self.content[y][v] = b'O';
-                        }
-                        c = 0;
-                    }
+                match self.index(x, y) {
                     b'O' => {
-                        self.content[y][x] = b'.';
+                        *self.index_mut(x, y) = b'.';
+                        *self.index_mut(p + c, y) = b'O';
                         c += 1;
+                    }
+                    b'#' => {
+                        p = x + 1;
+                        c = 0;
                     }
                     _ => {}
                 }
-            }
-
-            for v in self.width - c..self.width {
-                self.content[y][v] = b'O';
             }
         }
         self
     }
 
-    fn print(&self) -> &Self {
-        for i in 0..self.height {
-            for j in 0..self.width {
-                if self.content[i][j] == b'O' {
+    fn tilt_down(&mut self) -> &mut Self {
+        for x in 0..self.width {
+            let mut c = 0;
+            let mut p = self.height - 1;
+            for y in (0..self.height).rev() {
+                match self.index(x, y) {
+                    b'O' => {
+                        *self.index_mut(x, y) = b'.';
+                        *self.index_mut(x, p - c) = b'O';
+                        c += 1;
+                    }
+                    b'#' => {
+                        p = y - 1;
+                        c = 0;
+                    }
+                    _ => {}
+                }
+            }
+        }
+        self
+    }
+
+    fn tilt_right(&mut self) -> &mut Self {
+        for y in 0..self.height {
+            let mut c = 0;
+            let mut p = self.width - 1;
+            for x in (0..self.width).rev() {
+                match self.index(x, y) {
+                    b'O' => {
+                        *self.index_mut(x, y) = b'.';
+                        *self.index_mut(p - c, y) = b'O';
+                        c += 1;
+                    }
+                    b'#' => {
+                        p = x - 1;
+                        c = 0;
+                    }
+                    _ => {}
+                }
+            }
+        }
+        self
+    }
+
+    fn print(&self) {
+        for y in 0..self.height {
+            for x in 0..self.width {
+                if *self.index(x, y) == b'O' {
                     print!("O")
-                } else if self.content[i][j] == b'#' {
+                } else if *self.index(x, y) == b'#' {
                     print!("#")
                 } else {
                     print!(".")
@@ -180,28 +167,26 @@ impl Map {
             }
             println!();
         }
-        self
     }
 
     fn hash(&self) -> u64 {
         let mut hasher = DefaultHasher::new();
-        for line in self.content.iter() {
-            hasher.write(&line);
-        }
+        hasher.write(&self.data);
         hasher.finish()
     }
 }
 
-fn parse() -> Map {
-    let map = INPUT
-        .lines()
-        .map(|line| line.bytes().collect_vec())
-        .collect_vec();
-    
-    let h = map.len();
-    let w = map[0].len();
+fn parse() -> Vec2d<u8> {
+    let mut bytes = Vec::<u8>::new();
+    let mut bytes_iter = INPUT.bytes();
+    while let Some(byte) = bytes_iter.next() {
+        match byte {
+            b'\n' => { },
+            v => bytes.push(v),
+        }
+    }
 
-    Map { content: map, height: h, width: w }
+    Vec2d::from_vec(bytes, 100)
 }
 
 #[cfg(test)]

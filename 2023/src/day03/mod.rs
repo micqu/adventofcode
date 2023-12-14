@@ -1,6 +1,6 @@
 use itertools::Itertools;
 
-use crate::utils::{solution::{Solution, IntoSolution}, ADJ_EIGHT};
+use crate::utils::{solution::{Solution, IntoSolution}, vec2d::ADJ_EIGHT};
 
 pub const TITLE: &str = "Gear Ratios";
 const INPUT: &'static str = include_str!("input.txt");

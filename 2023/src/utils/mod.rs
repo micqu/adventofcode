@@ -1,7 +1,5 @@
 pub mod solution;
-
-pub const ADJ_EIGHT: [(isize, isize); 8] = [ (-1, 1), (-1, 0), (-1, -1), (0, -1), (0, 1), (1, 1), (1, 0), (1, -1) ];
-pub const ADJ_FOUR: [(isize, isize); 4] = [ (-1, 0), (0, -1), (0, 1), (1, 0) ];
+pub mod vec2d;
 
 pub fn length(n: u64) -> u32 {
     n.checked_ilog10().unwrap_or(0) + 1
