@@ -1,7 +1,4 @@
-use std::{
-    collections::{hash_map::DefaultHasher, HashMap},
-    hash::Hasher,
-};
+use std::collections::HashMap;
 
 use crate::utils::{solution::{IntoSolution, Solution}, vec2d::Vec2d};
 
@@ -9,7 +6,7 @@ pub const TITLE: &str = "Parabolic Reflector Dish";
 const INPUT: &'static str = include_str!("input.txt");
 
 pub fn part1() -> Option<Solution> {
-    parse().tilt_up().total_load().solution()
+    parse().tilt_up().solution()
 }
 
 pub fn part2() -> Option<Solution> {
@@ -17,56 +14,42 @@ pub fn part2() -> Option<Solution> {
 
     const N: usize = 1_000_000_000;
     let mut seen = HashMap::<u64, usize>::new();
-    let mut cycle_idx = 0;
-    let mut hash: u64 = 0;
+    let mut cycle_end = 0;
+    let mut hash = 0;
     for i in 0..N {
-        hash = map.hash();
+        map.tilt_up();
+        map.tilt_left();
+        let d = map.tilt_down();
+        let r = map.tilt_right();
+
+        hash = ((r as u64) << 32) | d as u64;
 
         if seen.contains_key(&hash) {
-            cycle_idx = i;
+            cycle_end = i + 1;
             break;
         }
 
-        seen.insert(hash, i);
-        map.cycle();
+        seen.insert(hash, i + 1);
     }
 
-    if cycle_idx > 0 {
-        let cycle_len = cycle_idx - seen.get(&hash).unwrap();
-        let rem = (N - cycle_idx) % cycle_len;
-        for _ in 0..rem {
-            map.cycle();
-        }
-    }
-    
-    map.total_load().solution()
+    let cycle_begin = seen.get(&hash).unwrap();
+    let cycle_len = cycle_end - cycle_begin;
+    let rem = (N - cycle_end) % cycle_len;
+    let end = seen.iter().find(|x| *x.1 == cycle_begin + rem).unwrap();
+    (end.0 >> 32).solution()
 }
 
 trait ParabolicDish {
-    fn total_load(&self) -> usize;
-    fn cycle(&mut self) -> &mut Self;
-    fn tilt_up(&mut self) -> &mut Self;
-    fn tilt_down(&mut self) -> &mut Self;
-    fn tilt_left(&mut self) -> &mut Self;
-    fn tilt_right(&mut self) -> &mut Self;
-    fn hash(&self) -> u64;
+    fn tilt_up(&mut self) -> u32;
+    fn tilt_down(&mut self) -> u32;
+    fn tilt_left(&mut self) -> u32;
+    fn tilt_right(&mut self) -> u32;
     fn print(&self);
 }
 
 impl ParabolicDish for Vec2d<u8> {
-    fn total_load(&self) -> usize {
+    fn tilt_up(&mut self) -> u32 {
         let mut s = 0;
-        for i in 0..self.height {
-            s += bytecount::count(&self.row(i), b'O') * (self.height - i);
-        }
-        s
-    }
-
-    fn cycle(&mut self) -> &mut Self {
-        self.tilt_up().tilt_left().tilt_down().tilt_right()
-    }
-
-    fn tilt_up(&mut self) -> &mut Self {
         for x in 0..self.width {
             let mut c = 0;
             let mut p = 0;
@@ -75,6 +58,7 @@ impl ParabolicDish for Vec2d<u8> {
                     b'O' => {
                         *self.index_mut(x, y) = b'.';
                         *self.index_mut(x, p + c) = b'O';
+                        s += (self.height - (p + c)) as u32;
                         c += 1;
                     }
                     b'#' => {
@@ -85,10 +69,11 @@ impl ParabolicDish for Vec2d<u8> {
                 }
             }
         }
-        self
+        s
     }
 
-    fn tilt_left(&mut self) -> &mut Self {
+    fn tilt_left(&mut self) -> u32 {
+        let mut s = 0;
         for y in 0..self.height {
             let mut c = 0;
             let mut p = 0;
@@ -97,6 +82,7 @@ impl ParabolicDish for Vec2d<u8> {
                     b'O' => {
                         *self.index_mut(x, y) = b'.';
                         *self.index_mut(p + c, y) = b'O';
+                        s += (self.height - y) as u32;
                         c += 1;
                     }
                     b'#' => {
@@ -107,10 +93,11 @@ impl ParabolicDish for Vec2d<u8> {
                 }
             }
         }
-        self
+        s
     }
 
-    fn tilt_down(&mut self) -> &mut Self {
+    fn tilt_down(&mut self) -> u32 {
+        let mut s = 0;
         for x in 0..self.width {
             let mut c = 0;
             let mut p = self.height - 1;
@@ -119,20 +106,22 @@ impl ParabolicDish for Vec2d<u8> {
                     b'O' => {
                         *self.index_mut(x, y) = b'.';
                         *self.index_mut(x, p - c) = b'O';
+                        s += (self.height - (p - c)) as u32;
                         c += 1;
                     }
                     b'#' => {
-                        p = y - 1;
+                        p = y.saturating_sub(1);
                         c = 0;
                     }
                     _ => {}
                 }
             }
         }
-        self
+        s
     }
 
-    fn tilt_right(&mut self) -> &mut Self {
+    fn tilt_right(&mut self) -> u32 {
+        let mut s = 0;
         for y in 0..self.height {
             let mut c = 0;
             let mut p = self.width - 1;
@@ -141,17 +130,18 @@ impl ParabolicDish for Vec2d<u8> {
                     b'O' => {
                         *self.index_mut(x, y) = b'.';
                         *self.index_mut(p - c, y) = b'O';
+                        s += (self.height - y) as u32;
                         c += 1;
                     }
                     b'#' => {
-                        p = x - 1;
+                        p = x.saturating_sub(1);
                         c = 0;
                     }
                     _ => {}
                 }
             }
         }
-        self
+        s
     }
 
     fn print(&self) {
@@ -167,12 +157,6 @@ impl ParabolicDish for Vec2d<u8> {
             }
             println!();
         }
-    }
-
-    fn hash(&self) -> u64 {
-        let mut hasher = DefaultHasher::new();
-        hasher.write(&self.data);
-        hasher.finish()
     }
 }
 
@@ -197,7 +181,7 @@ mod tests {
     fn part1() {
         let result = super::part1().unwrap();
         match result {
-            Solution::Usize(a) => assert_eq!(a, 110565),
+            Solution::U32(a) => assert_eq!(a, 110565),
             _ => panic!(),
         }
     }
@@ -206,7 +190,7 @@ mod tests {
     fn part2() {
         let result = super::part2().unwrap();
         match result {
-            Solution::Usize(a) => assert_eq!(a, 89845),
+            Solution::U64(a) => assert_eq!(a, 89845),
             _ => panic!(),
         }
     }
