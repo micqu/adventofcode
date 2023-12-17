@@ -37,7 +37,7 @@ impl<T> Vec2d<T> {
     }
 
     pub fn up(&self, x: usize, y: usize) -> Option<(usize, usize)> {
-        if y == 0 {
+        if y <= 0 {
             return None;
         }
 
@@ -45,7 +45,7 @@ impl<T> Vec2d<T> {
     }
 
     pub fn down(&self, x: usize, y: usize) -> Option<(usize, usize)> {
-        if y < self.height - 1 {
+        if y >= self.height - 1 {
             return None;
         }
 
@@ -53,7 +53,7 @@ impl<T> Vec2d<T> {
     }
 
     pub fn right(&self, x: usize, y: usize) -> Option<(usize, usize)> {
-        if x < self.width - 1 {
+        if x >= self.width - 1 {
             return None;
         }
 
@@ -61,7 +61,7 @@ impl<T> Vec2d<T> {
     }
 
     pub fn left(&self, x: usize, y: usize) -> Option<(usize, usize)> {
-        if x > 0 {
+        if x <= 0 {
             return None;
         }
 
@@ -133,8 +133,8 @@ pub const ADJ_EIGHT: [(isize, isize); 8] = [
     (-1, -1),
     (0, -1),
     (0, 1),
-    (1, 1),
     (1, 0),
+    (1, 1),
     (1, -1),
 ];
 
@@ -169,7 +169,7 @@ impl Iterator for EightConnected {
     }
 }
 
-pub const ADJ_FOUR: [(isize, isize); 4] = [(-1, 0), (0, -1), (0, 1), (1, 0)];
+pub const ADJ_FOUR: [(isize, isize); 4] = [ (1, 0), (0, -1), (-1, 0), (0, 1) ];
 
 pub struct FourConnected {
     x: usize,
@@ -180,7 +180,7 @@ pub struct FourConnected {
 }
 
 impl Iterator for FourConnected {
-    type Item = (usize, usize);
+    type Item = (usize, usize, usize);
 
     fn next(&mut self) -> Option<Self::Item> {
         loop {
@@ -197,7 +197,7 @@ impl Iterator for FourConnected {
                 continue;
             }
 
-            return Some((nx as usize, ny as usize));
+            return Some((nx as usize, ny as usize, self.current));
         }
     }
 }
