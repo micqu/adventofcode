@@ -9,7 +9,7 @@ const INPUT: &'static str = include_str!("input.txt");
 
 pub fn part1() -> Option<Solution> {
     let mut lines = INPUT.lines();
-    let (insts, map) = parse2(&mut lines);
+    let (insts, map) = parse(&mut lines);
 
     let g = compose_node_id(b'Z', b'Z', b'Z');
     let mut c = compose_node_id(b'A', b'A', b'A');
@@ -35,7 +35,7 @@ pub fn part1() -> Option<Solution> {
 
 pub fn part2() -> Option<Solution> {
     let mut lines = INPUT.lines();
-    let (insts, map) = parse2(&mut lines);
+    let (insts, map) = parse(&mut lines);
 
     let mut starts = vec![0];
     for node in map.iter() {
@@ -65,7 +65,7 @@ pub fn part2() -> Option<Solution> {
     }).fold(1, lcm).solution()
 }
 
-fn parse2(lines: &mut Lines) -> (Vec<u8>, Vec<u64>) {
+fn parse(lines: &mut Lines) -> (Vec<u8>, Vec<u64>) {
     let insts: Vec<u8> = lines.next().unwrap().bytes().collect();
     let mut map = vec![0; 26426];
     while let Some(line) = lines.next() {
@@ -102,7 +102,6 @@ fn decompose_node(a: u64) -> (u16, u16, u16) {
     let id = (a & (0b1111111111111111 << 32)) >> 32;
     (id as u16, left as u16, right as u16)
 }
-
 
 fn compose_node_id(a: u8, b: u8, c: u8) -> u16 {
     ((((a - b'A') as u16) << 10) | ((b - b'A') as u16) << 5) | ((c - b'A') as u16)

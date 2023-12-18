@@ -62,37 +62,21 @@ fn parse2() -> Vec<Instruction> {
 }
 
 fn solve(instructions: &Vec<Instruction>) -> usize {
-    let mut ps = Vec::<Position>::new();
-    let mut p = Position { x: 0, y: 0 };
-    ps.push(p.clone());
-    let mut l = 0;
+    let mut p: (isize, isize) = (0, 0);
+    let mut a: isize = 0;
+    let mut l: usize = 0;
+
+    // Shoelace
     for inst in instructions {
-        p.x += ADJ_FOUR[inst.dir].0 * inst.len as isize;
-        p.y += ADJ_FOUR[inst.dir].1 * inst.len as isize;
+        let nx = p.0 + ADJ_FOUR[inst.dir].0 * inst.len as isize;
+        let ny = p.1 + ADJ_FOUR[inst.dir].1 * inst.len as isize;
+        a += p.0 * ny - nx * p.1;
+        p = (nx, ny);
         l += inst.len;
-        ps.push(p.clone());
     }
 
     // Pick's
-    area(&ps) + l / 2 + 1
-}
-
-// Shoelace
-fn area(verts: &Vec<Position>) -> usize {
-    (0..verts.len())
-        .map(|i| det(&verts[i], &verts[(i + 1) % verts.len()]))
-        .sum::<isize>() as usize
-        / 2
-}
-
-fn det(a: &Position, b: &Position) -> isize {
-    a.x * b.y - b.x * a.y
-}
-
-#[derive(Debug, Clone)]
-struct Position {
-    x: isize,
-    y: isize,
+    a as usize / 2 + l / 2 + 1
 }
 
 #[derive(Debug)]
