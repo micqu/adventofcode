@@ -50,7 +50,7 @@ fn solve(
     for d in [0, 3] {
         q.push(Node::new(start.0, start.1, d));
     }
-
+    
     while let Some(u) = q.pop() {
         if end(&u) {
             return u.heat;
@@ -81,8 +81,7 @@ fn solve(
 
                 let c = u.heat + cost_acc;
                 let k = vd % 2;
-                let n = dists[k][(vx, vy)];
-                if c < n {
+                if c < dists[k][(vx, vy)] {
                     dists[k][(vx, vy)] = c;
                     q.push(Node {
                         x: vx,
