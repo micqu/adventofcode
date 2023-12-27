@@ -88,6 +88,16 @@ impl<T> Vec2d<T> {
         }
     }
 
+    pub fn four_connected_unbound(&self, x: isize, y: isize) -> FourConnectedUnbound {
+        FourConnectedUnbound {
+            x: x,
+            y: y,
+            height: self.height,
+            width: self.width,
+            current: 0,
+        }
+    }
+
     pub fn diagonals(&self, x: usize, y: usize) -> Diagonals {
         Diagonals {
             x,
@@ -197,7 +207,34 @@ impl Iterator for FourConnected {
                 continue;
             }
 
-            return Some((nx as usize, ny as usize, self.current));
+            return Some((nx as usize, ny as usize, self.current - 1));
+        }
+    }
+}
+
+pub struct FourConnectedUnbound {
+    x: isize,
+    y: isize,
+    height: usize,
+    width: usize,
+    current: usize,
+}
+
+impl Iterator for FourConnectedUnbound {
+    type Item = (isize, isize, usize);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        loop {
+            if self.current > 3 {
+                return None;
+            }
+
+            let nx = self.x + ADJ_FOUR[self.current].0;
+            let ny = self.y + ADJ_FOUR[self.current].1;
+
+            self.current += 1;
+
+            return Some((nx, ny, self.current));
         }
     }
 }
