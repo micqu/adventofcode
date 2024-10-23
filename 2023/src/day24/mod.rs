@@ -1,8 +1,7 @@
 use itertools::Itertools;
 
 use crate::utils::{
-    solution::{IntoSolution, Solution},
-    Parsable,
+    solution::{IntoSolution, Solution}, vec3::Vec3, Parsable
 };
 
 pub const TITLE: &str = "Never Tell Me The Odds";
@@ -56,17 +55,17 @@ pub fn part2() -> Option<Solution> {
 fn parse() -> Vec<Hailstone> {
     let mut lines = Vec::new();
     let mut bytes = INPUT.bytes();
-    while let Some(a) = Parsable::<isize>::next_number(&mut bytes) {
+    while let Some(a) = bytes.next_number() {
         let p = Vec3 {
-            x: a as f64,
-            y: Parsable::<isize>::next_number(&mut bytes).unwrap() as f64,
-            z: Parsable::<isize>::next_number(&mut bytes).unwrap() as f64,
+            x: a,
+            y: bytes.next_number().unwrap(),
+            z: bytes.next_number().unwrap(),
         };
 
         let d = Vec3 {
-            x: Parsable::<isize>::next_number(&mut bytes).unwrap() as f64,
-            y: Parsable::<isize>::next_number(&mut bytes).unwrap() as f64,
-            z: Parsable::<isize>::next_number(&mut bytes).unwrap() as f64,
+            x: bytes.next_number().unwrap(),
+            y: bytes.next_number().unwrap(),
+            z: bytes.next_number().unwrap(),
         };
 
         lines.push(Hailstone { p, d });
@@ -85,63 +84,6 @@ impl Hailstone {
         Self {
             p: self.p.sub(&other.p),
             d: self.d.sub(&other.d),
-        }
-    }
-}
-
-#[derive(Debug)]
-struct Vec3 {
-    x: f64,
-    y: f64,
-    z: f64,
-}
-
-impl Vec3 {
-    fn dot3d(&self, other: &Self) -> f64 {
-        self.x * other.x + self.y * other.y + self.z * other.z
-    }
-
-    fn cross2d(&self, other: &Self) -> f64 {
-        self.x * other.y - other.x * self.y
-    }
-
-    fn cross3d(&self, other: &Self) -> Self {
-        Self {
-            x: self.y * other.z - other.y * self.z,
-            y: self.z * other.x - other.z * self.x,
-            z: self.x * other.y - other.x * self.y,
-        }
-    }
-
-    fn sub(&self, other: &Self) -> Self {
-        Self {
-            x: self.x - other.x,
-            y: self.y - other.y,
-            z: self.z - other.z,
-        }
-    }
-
-    fn add(&self, other: &Self) -> Self {
-        Self {
-            x: self.x + other.x,
-            y: self.y + other.y,
-            z: self.z + other.z,
-        }
-    }
-
-    fn div_n(&self, n: f64) -> Self {
-        Self {
-            x: self.x / n,
-            y: self.y / n,
-            z: self.z / n,
-        }
-    }
-
-    fn mul_n(&self, n: f64) -> Self {
-        Self {
-            x: self.x * n,
-            y: self.y * n,
-            z: self.z * n,
         }
     }
 }

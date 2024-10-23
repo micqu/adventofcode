@@ -1,28 +1,9 @@
 pub mod solution;
 pub mod vec2d;
+pub mod vec3;
 
 pub fn length(n: u64) -> u32 {
     n.checked_ilog10().unwrap_or(0) + 1
-}
-
-pub fn parse_u32<T>(input: &mut T) -> Option<u32>
-where
-    T: Iterator<Item = char>,
-{
-    let mut value: Option<u32> = None;
-    for char in input {
-        if let Some(digit) = char.to_digit(10) {
-            if let Some(current) = value {
-                value = Some(current * 10 + digit);
-            } else {
-                value = Some(digit);
-            }
-        } else if value.is_some() {
-            return value;
-        }
-    }
-
-    value
 }
 
 macro_rules! parse_positive_number {
@@ -49,6 +30,7 @@ macro_rules! parse_positive_number {
     }
 }
 
+parse_positive_number!(parse_u32, u32);
 parse_positive_number!(parse_u64, u64);
 parse_positive_number!(parse_u128, u128);
 
@@ -129,6 +111,11 @@ macro_rules! parsable_number {
     };
 }
 
+parsable_number!(u32);
+parsable_number!(u64);
+parsable_number!(u128);
+parsable_number!(usize);
+
 macro_rules! parsable_negative_number {
     ($type:ident) => {
         impl<T: Iterator<Item = u8>> Parsable<$type> for T {
@@ -166,14 +153,50 @@ macro_rules! parsable_negative_number {
     };
 }
 
-parsable_number!(u32);
-parsable_number!(u64);
-parsable_number!(u128);
-parsable_number!(usize);
 parsable_negative_number!(i32);
 parsable_negative_number!(i64);
 parsable_negative_number!(i128);
 parsable_negative_number!(isize);
+
+macro_rules! parsable_float_number {
+    ($type:ident) => {
+        impl<T: Iterator<Item = u8>> Parsable<$type> for T {
+            fn next_number(&mut self) -> Option<$type> {
+                let mut negative = false;
+                let mut value: Option<$type> = None;
+                for byte in self {
+                    if let Some(digit) = byte.to_digit() {
+                        if let Some(current) = value {
+                            value = Some(current * 10.0 + digit as $type);
+                        } else {
+                            value = Some(digit as $type);
+                        }
+                    } else if let Some(value) = value {
+                        if negative {
+                            return Some(-value);
+                        }
+                        return Some(value);
+                    } else if byte == b'-' {
+                        negative = true;
+                    } else {
+                        negative = false;
+                    }
+                }
+
+                if let Some(value) = value {
+                    if negative {
+                        return Some(-value);
+                    }
+                    return Some(value);
+                }
+                None
+            }
+        }
+    };
+}
+
+parsable_float_number!(f32);
+parsable_float_number!(f64);
 
 pub trait ToNumbers<T> {
     fn to_numbers(&self) -> Vec<T>;

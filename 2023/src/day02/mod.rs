@@ -4,22 +4,27 @@ pub const TITLE: &str = "Cube Conundrum";
 const INPUT: &'static str = include_str!("input.txt");
 
 pub fn part1() -> Option<Solution> {
-    INPUT.lines().enumerate().map(|(id, line)| {
-        let mut splits = line.split(&[',', ';', ':', ' ']).skip(2);
-        while let Some(split) = splits.next() {
-            if let Ok(n) = split.parse::<usize>() {
-                let b = splits.next().unwrap();
-                match b.chars().nth(0).unwrap() {
-                    'r' if n > 12 => return 0,
-                    'g' if n > 13 => return 0,
-                    'b' if n > 14 => return 0,
-                    _ => { },
+    INPUT
+        .lines()
+        .enumerate()
+        .map(|(id, line)| {
+            let mut splits = line.split(&[',', ';', ':', ' ']).skip(2);
+            while let Some(s) = splits.next() {
+                if let Ok(n) = s.parse::<usize>() {
+                    let b = splits.next().unwrap();
+                    match b.chars().nth(0).unwrap() {
+                        'r' if n > 12 => return 0,
+                        'g' if n > 13 => return 0,
+                        'b' if n > 14 => return 0,
+                        _ => {}
+                    }
                 }
             }
-        }
-        
-        id + 1
-    }).sum::<usize>().solution()
+
+            id + 1
+        })
+        .sum::<usize>()
+        .solution()
 }
 
 pub fn part2() -> Option<Solution> {

@@ -78,10 +78,30 @@ impl<T> Vec2d<T> {
         }
     }
 
+    pub fn eight_connected_point(&self, point: (usize, usize)) -> EightConnected {
+        EightConnected {
+            x: point.0,
+            y: point.1,
+            height: self.height,
+            width: self.width,
+            current: 0,
+        }
+    }
+
     pub fn four_connected(&self, x: usize, y: usize) -> FourConnected {
         FourConnected {
             x,
             y,
+            height: self.height,
+            width: self.width,
+            current: 0,
+        }
+    }
+
+    pub fn four_connected_point(&self, point: (usize, usize)) -> FourConnected {
+        FourConnected {
+            x: point.0,
+            y: point.1,
             height: self.height,
             width: self.width,
             current: 0,

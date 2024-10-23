@@ -1,5 +1,3 @@
-use itertools::Itertools;
-
 use crate::utils::{
     solution::{IntoSolution, Solution},
     vec2d::{Vec2d, ADJ_FOUR},
@@ -7,6 +5,9 @@ use crate::utils::{
 
 pub const TITLE: &str = "A Long Walk";
 const INPUT: &'static str = include_str!("input.txt");
+
+const L: usize = 141;
+const GOAL: usize = L - 2 + (L - 1) * L;
 
 pub fn part1() -> Option<Solution> {
     let map = parse();
@@ -16,8 +17,8 @@ pub fn part1() -> Option<Solution> {
 pub fn part2() -> Option<Solution> {
     let map = parse();
     let dmap = condense_map((1, 0), 3, &map);
-    let mut seen = vec![0; dmap.len()];
-    solve2(1, 1, &dmap, &mut seen).unwrap().solution()
+    let mut seen = vec![false; dmap.len()];
+    solve2(1, GOAL, &dmap, &mut seen).unwrap().solution()
 }
 
 fn parse() -> Vec2d<u8> {
@@ -55,41 +56,35 @@ fn solve(pos: (usize, usize), dir: usize, map: &Vec2d<u8>) -> usize {
 
 fn solve2(
     i: usize,
-    from: usize,
+    goal: usize,
     dmap: &Vec<Option<Junction>>,
-    seen: &mut Vec<usize>,
+    seen: &mut Vec<bool>,
 ) -> Option<usize> {
-    const L: usize = 141;
-    if i == L - 2 + (L - 1) * L {
+    if i == goal {
         return Some(0);
     }
 
-    seen[i] = 1;
-    
+    seen[i] = true;
+
     let mut best: Option<usize> = None;
     if let Some(c) = &dmap[i] {
-        for (nid, s) in c.steps.iter() {
-            if *s == 0 || *nid == from {
-                continue;
-            }
-            
-            if seen[*nid] == 1 {
+        for &(nid, s) in c.steps.iter() {
+            if s == 0 || seen[nid] {
                 continue;
             }
 
-            if let Some(b) = solve2(*nid, i, dmap, seen) {
+            if let Some(b) = solve2(nid, goal, dmap, seen) {
                 best = Some(best.map_or(s + b, |v| v.max(s + b)));
             }
         }
     }
 
-    seen[i] = 0;
+    seen[i] = false;
     best
 }
 
 fn condense_map(pos: (usize, usize), dir: usize, map: &Vec2d<u8>) -> Vec<Option<Junction>> {
-    let mut dense: Vec<Option<Junction>> =
-        (0..(map.width * map.height)).map(|_| None).collect_vec();
+    let mut dense: Vec<Option<Junction>> = vec![None; map.width * map.height];
     let mut q = Vec::<((usize, usize), usize)>::new();
     q.push((pos, dir));
 
@@ -110,7 +105,7 @@ fn condense_map(pos: (usize, usize), dir: usize, map: &Vec2d<u8>) -> Vec<Option<
         });
         n.steps[(nd + 2) % 4] = (cid, s);
 
-        for (vx, vy, vd) in map.four_connected(np.0, np.1) {
+        for (vx, vy, vd) in map.four_connected_point(np) {
             if let Some(sd) = is_slope(map[(vx, vy)]) {
                 if vd == sd {
                     if n.steps[vd].1 == 0 {
@@ -130,10 +125,6 @@ fn walk_segment(
     map: &Vec2d<u8>,
 ) -> ((usize, usize), usize, usize) {
     let mut s = 0;
-
-    if pos.0 == map.width - 2 && pos.1 == map.height - 1 {
-        return (pos, dir, s);
-    }
 
     let vx = (pos.0 as isize + ADJ_FOUR[dir].0) as usize;
     let vy = (pos.1 as isize + ADJ_FOUR[dir].1) as usize;
@@ -164,7 +155,7 @@ fn walk_segment(
         }
     }
 
-    for (vx, vy, vd) in map.four_connected(pos.0, pos.1) {
+    for (vx, vy, vd) in map.four_connected_point(pos) {
         if let Some(_) = is_slope(map[(vx, vy)]) {
             let vx = (vx as isize + ADJ_FOUR[vd].0) as usize;
             let vy = (vy as isize + ADJ_FOUR[vd].1) as usize;
@@ -191,14 +182,12 @@ fn switch_dir(pos: (usize, usize), dir: usize, map: &Vec2d<u8>) -> Option<usize>
 fn is_slope(byte: u8) -> Option<usize> {
     match byte {
         b'>' => Some(0),
-        b'^' => Some(1),
-        b'<' => Some(2),
         b'v' => Some(3),
         _ => None,
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct Junction {
     id: usize,
     steps: Vec<(usize, usize)>,

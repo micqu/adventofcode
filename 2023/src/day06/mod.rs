@@ -1,15 +1,15 @@
-use crate::utils::{solution::{Solution, IntoSolution}, parse_u64};
+use crate::utils::{parse_u64, solution::{IntoSolution, Solution}, Parsable};
 
 pub const TITLE: &str = "Wait For It";
 const INPUT: &'static str = include_str!("input.txt");
 
 pub fn part1() -> Option<Solution> {
     let mut lines = INPUT.lines();
-    let mut a = lines.next().unwrap().chars();
-    let mut b = lines.next().unwrap().chars();
+    let mut a = lines.next().unwrap().bytes();//.chars();
+    let mut b = lines.next().unwrap().bytes();
     let mut s = 1;
-    while let Some(time) = parse_u64(&mut a) {
-        if let Some(dist) = parse_u64(&mut b) {
+    while let Some(time) = a.next_number() {
+        if let Some(dist) = b.next_number() {
             s *= solve(time, dist);
         }
     }
