@@ -127,6 +127,14 @@ impl<T> Vec2d<T> {
             current: 0,
         }
     }
+
+    pub fn contains(&self, p: &(isize, isize)) -> Option<(usize, usize)> {
+        if p.0 < 0 || p.0 >= self.width as isize || p.1 < 0 || p.1 >= self.height as isize {
+            return None;
+        }
+    
+        Some((p.0 as usize, p.1 as usize))
+    }
 }
 
 impl<T> std::ops::Index<(usize, usize)> for Vec2d<T> {
