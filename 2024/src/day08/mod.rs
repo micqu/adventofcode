@@ -9,10 +9,10 @@ pub const TITLE: &str = "Resonant Collinearity";
 const INPUT: &'static str = include_str!("input.txt");
 
 pub fn part1() -> Option<Solution> {
-    let (map, lookup) = parse();
-    let mut result = HashSet::<(isize, isize)>::new();
+    let (lookup, w, h) = parse();
+    let mut result = Vec2d::<bool>::from_vec_width(vec![false; w * h], w);
 
-    for (_, chs) in lookup {
+    for chs in lookup.into_iter().filter_map(|x| x) {
         for i in 0..chs.len() - 1 {
             let a = chs[i];
 
@@ -21,74 +21,73 @@ pub fn part1() -> Option<Solution> {
 
                 let d = (b.0 - a.0, b.1 - a.1);
                 let aa = (a.0 - d.0, a.1 - d.1);
-                if let Some(_) = map.contains(&aa) {
-                    result.insert(aa);
+                if let Some(p) = result.contains(&aa) {
+                    result[p] = true;
                 }
-                
+
                 let bb = (b.0 + d.0, b.1 + d.1);
-                if let Some(_) = map.contains(&bb) {
-                    result.insert(bb);
+                if let Some(p) = result.contains(&bb) {
+                    result[p] = true;
                 }
             }
         }
     }
 
-    result.len().solution()
+    result.data.into_iter().filter(|x| *x).count().solution()
 }
 
 pub fn part2() -> Option<Solution> {
-    let (map, lookup) = parse();
-    let mut result = HashSet::<(isize, isize)>::new();
+    let (lookup, w, h) = parse();
+    let mut result = Vec2d::<bool>::from_vec_width(vec![false; w * h], w);
 
-    for (_, chs) in lookup {
+    for chs in lookup.into_iter().filter_map(|x| x) {
         for i in 0..chs.len() - 1 {
             let a = chs[i];
-            result.insert(a);
+            result[(a.0 as usize, a.1 as usize)] = true;
 
             for j in (i + 1)..chs.len() {
                 let b = chs[j];
-                result.insert(b);
+                result[(b.0 as usize, b.1 as usize)] = true;
 
                 let d = (b.0 - a.0, b.1 - a.1);
                 let mut aa = (a.0 - d.0, a.1 - d.1);
-                while let Some(_) = map.contains(&aa) {
-                    result.insert(aa);
+                while let Some(p) = result.contains(&aa) {
+                    result[p] = true;
                     aa = (aa.0 - d.0, aa.1 - d.1);
                 }
-                
+
                 let mut bb = (b.0 + d.0, b.1 + d.1);
-                while let Some(_) = map.contains(&bb) {
-                    result.insert(bb);
+                while let Some(p) = result.contains(&bb) {
+                    result[p] = true;
                     bb = (bb.0 + d.0, bb.1 + d.1);
                 }
             }
         }
     }
 
-    result.len().solution()
+    result.data.into_iter().filter(|x| *x).count().solution()
 }
 
-fn parse() -> (Vec2d<u8>, HashMap<u8, Vec<(isize, isize)>>) {
+fn parse() -> (Vec<Option<Vec<(isize, isize)>>>, usize, usize) {
+    let mut w: usize = 0;
     let mut h: usize = 0;
-    let mut lookup = HashMap::<u8, Vec<(isize, isize)>>::new();
-    let k = INPUT
-        .lines()
-        .map(|x| {
-            for (i, ch) in x.bytes().enumerate() {
-                if ch != b'.' {
-                    lookup
-                        .entry(ch)
-                        .or_insert(Vec::new())
-                        .push((i as isize, h as isize));
+    let mut lookup: Vec<Option<Vec<(isize, isize)>>> = vec![None; 256];
+
+    for line in INPUT.lines() {
+        w = line.len();
+        for (x, ch) in line.bytes().enumerate() {
+            if ch != b'.' {
+                if let Some(v) = &mut lookup[ch as usize] {
+                    v.push((x as isize, h as isize));
+                } else {
+                    lookup[ch as usize] = Some(vec![(x as isize, h as isize)]);
                 }
             }
-            h += 1;
-            x.bytes()
-        })
-        .flatten()
-        .collect();
+        }
+        h += 1;
+    }
 
-    (Vec2d::from_vec_height(k, h), lookup)
+    (lookup, w, h)
 }
 
 #[cfg(test)]
