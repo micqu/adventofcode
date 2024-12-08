@@ -115,7 +115,7 @@ fn parse() -> ((isize, isize), Vec2d<u8>) {
         .flatten()
         .collect();
 
-    (start, Vec2d::from_vec(k, h))
+    (start, Vec2d::from_vec_height(k, h))
 }
 
 #[cfg(test)]

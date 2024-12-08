@@ -82,7 +82,7 @@ pub fn part2() -> Option<Solution> {
 fn parse() -> Vec2d<u8> {
     let mut h = 0;
     let k = INPUT.lines().inspect(|_| h += 1).map(|x| x.bytes()).flatten().collect();
-    Vec2d::from_vec(k, h)
+    Vec2d::from_vec_height(k, h)
 }
 
 fn is_inside(m: &Vec2d<u8>, p: &(isize, isize)) -> Option<(usize, usize)> {

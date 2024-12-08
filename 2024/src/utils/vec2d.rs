@@ -8,10 +8,18 @@ pub struct Vec2d<T> {
 }
 
 impl<T> Vec2d<T> {
-    pub fn from_vec(vec: Vec<T>, width: usize) -> Self {
+    pub fn from_vec_width(vec: Vec<T>, width: usize) -> Self {
         Self {
             height: vec.len() / width,
             width,
+            data: vec,
+        }
+    }
+
+    pub fn from_vec_height(vec: Vec<T>, height: usize) -> Self {
+        Self {
+            height,
+            width: vec.len() / height,
             data: vec,
         }
     }
