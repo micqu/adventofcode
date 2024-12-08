@@ -59,7 +59,7 @@ fn solve2(t: usize, i: usize, e: &Vec<usize>) -> bool {
         return true;
     }
 
-    if let Some(r) = is_subnumber(t, d) {
+    if let Some(r) = split(t, d) {
         if solve2(r, i + 1, e) {
             return true;
         }
@@ -99,12 +99,15 @@ fn length(mut a: usize) -> u32 {
     i
 }
 
-fn is_subnumber(a: usize, b: usize) -> Option<usize> {
-    let k = 10usize.pow(length(b));
-    if a % k == b {
-        return Some(a / k)
+fn split(mut lhs: usize, mut rhs: usize) -> Option<usize> {
+    while rhs > 0 {
+        if lhs % 10 != rhs % 10 {
+            return None;
+        }
+        lhs /= 10;
+        rhs /= 10;
     }
-    None
+    Some(lhs)
 }
 
 fn parse() -> Vec<Equation> {

@@ -4,13 +4,11 @@ use itertools::Itertools;
 
 use crate::utils::{
     solution::{IntoSolution, Solution},
-    vec2d::Vec2d,
+    vec2d::{Vec2d, ADJ_FOUR},
 };
 
 pub const TITLE: &str = "Guard Gallivant";
 const INPUT: &'static str = include_str!("input.txt");
-
-const DIR_FOUR: [(isize, isize); 4] = [(1, 0), (0, -1), (-1, 0), (0, 1)];
 
 pub fn part1() -> Option<Solution> {
     let (start, map) = parse();
@@ -19,13 +17,13 @@ pub fn part1() -> Option<Solution> {
 
     let mut pos = start;
     let mut dir = 1;
-    let mut d = DIR_FOUR[dir];
+    let mut d = ADJ_FOUR[dir];
     let mut next = (pos.0 + d.0, pos.1 + d.1);
 
     while let Some(n) = map.contains(&next) {
         if map[n] == b'#' {
             dir = (dir + 3) % 4;
-            d = DIR_FOUR[dir];
+            d = ADJ_FOUR[dir];
         } else {
             seen[n] = 1;
             pos.0 += d.0;
@@ -41,7 +39,7 @@ pub fn part1() -> Option<Solution> {
 pub fn part2() -> Option<Solution> {
     let (mut pos, map) = parse();
     let mut dir: usize = 1;
-    let mut d = DIR_FOUR[dir];
+    let mut d = ADJ_FOUR[dir];
     let mut next = (pos.0 + d.0, pos.1 + d.1);
     let mut seen = Vec2d::new(vec![[false; 4]; map.width * map.height], map.width, map.height);
     let mut result = HashSet::<(isize, isize)>::new();
@@ -53,7 +51,7 @@ pub fn part2() -> Option<Solution> {
         
         if map[n] == b'#' {
             dir = (dir + 3) % 4;
-            d = DIR_FOUR[dir];
+            d = ADJ_FOUR[dir];
         } else {
             pos.0 += d.0;
             pos.1 += d.1;
@@ -73,7 +71,7 @@ fn check(
     map: &Vec2d<u8>,
     seen: &Vec2d::<[bool; 4]>,
 ) -> bool {
-    let mut d = DIR_FOUR[dir];
+    let mut d = ADJ_FOUR[dir];
     let mut next = (pos.0 + d.0, pos.1 + d.1);
     let mut inner_seen = Vec2d::new(vec![[false; 4]; map.width * map.height], map.width, map.height);
     inner_seen[(pos.0 as usize, pos.1 as usize)][dir] = true;
@@ -81,7 +79,7 @@ fn check(
     while let Some(n) = map.contains(&next) {
         if map[n] == b'#' || next == obj {
             dir = (dir + 3) % 4;
-            d = DIR_FOUR[dir];
+            d = ADJ_FOUR[dir];
         } else {
             pos.0 += d.0;
             pos.1 += d.1;

@@ -1,5 +1,7 @@
 use core::fmt;
 
+use super::point::Point;
+
 #[derive(Debug, Clone)]
 pub struct Vec2d<T> {
     pub data: Vec<T>,
@@ -25,7 +27,11 @@ impl<T> Vec2d<T> {
     }
 
     pub fn new(vec: Vec<T>, width: usize, height: usize) -> Self {
-        Self { data: vec, width, height }
+        Self {
+            data: vec,
+            width,
+            height,
+        }
     }
 
     pub fn row(&self, y: usize) -> &[T] {
@@ -74,6 +80,18 @@ impl<T> Vec2d<T> {
         }
 
         Some((x - 1, y))
+    }
+
+    pub fn contains(&self, p: &(isize, isize)) -> Option<(usize, usize)> {
+        if p.0 < 0 || p.0 >= self.width as isize || p.1 < 0 || p.1 >= self.height as isize {
+            return None;
+        }
+
+        Some((p.0 as usize, p.1 as usize))
+    }
+
+    pub fn contains_point(&self, p: &Point) -> bool {
+        !(p.x < 0 || p.x >= self.width as isize || p.y < 0 || p.y >= self.height as isize)
     }
 
     pub fn eight_connected(&self, x: usize, y: usize) -> EightConnected {
@@ -135,14 +153,6 @@ impl<T> Vec2d<T> {
             current: 0,
         }
     }
-
-    pub fn contains(&self, p: &(isize, isize)) -> Option<(usize, usize)> {
-        if p.0 < 0 || p.0 >= self.width as isize || p.1 < 0 || p.1 >= self.height as isize {
-            return None;
-        }
-    
-        Some((p.0 as usize, p.1 as usize))
-    }
 }
 
 impl<T> std::ops::Index<(usize, usize)> for Vec2d<T> {
@@ -174,14 +184,14 @@ impl<T: std::fmt::Debug> std::fmt::Display for Vec2d<T> {
 }
 
 pub const ADJ_EIGHT: [(isize, isize); 8] = [
-    (-1, 1),
-    (-1, 0),
-    (-1, -1),
-    (0, -1),
-    (0, 1),
     (1, 0),
-    (1, 1),
     (1, -1),
+    (0, -1),
+    (-1, -1),
+    (-1, 0),
+    (-1, 1),
+    (0, 1),
+    (1, 1),
 ];
 
 pub struct EightConnected {
@@ -215,7 +225,7 @@ impl Iterator for EightConnected {
     }
 }
 
-pub const ADJ_FOUR: [(isize, isize); 4] = [ (1, 0), (0, -1), (-1, 0), (0, 1) ];
+pub const ADJ_FOUR: [(isize, isize); 4] = [(1, 0), (0, -1), (-1, 0), (0, 1)];
 
 pub struct FourConnected {
     x: usize,
@@ -275,7 +285,7 @@ impl Iterator for FourConnectedUnbound {
     }
 }
 
-pub const DIAGONAL: [(isize, isize); 4] = [(-1, 1), (1, -1), (1, 1), (-1, -1)];
+pub const ADJ_DIAGONAL: [(isize, isize); 4] = [(1, -1), (-1, -1), (-1, 1), (1, 1)];
 
 pub struct Diagonals {
     x: usize,
@@ -294,8 +304,8 @@ impl Iterator for Diagonals {
                 return None;
             }
 
-            let nx = self.x as isize + DIAGONAL[self.current].0;
-            let ny = self.y as isize + DIAGONAL[self.current].1;
+            let nx = self.x as isize + ADJ_DIAGONAL[self.current].0;
+            let ny = self.y as isize + ADJ_DIAGONAL[self.current].1;
 
             self.current += 1;
 

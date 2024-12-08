@@ -1,4 +1,4 @@
-use crate::utils::solution::{Solution, IntoSolution};
+use crate::utils::{point::Point, solution::{IntoSolution, Solution}};
 
 pub const TITLE: &str = "?!";
 const INPUT: &'static str = include_str!("input.txt");

@@ -1,5 +1,7 @@
 pub mod solution;
+pub mod point;
 pub mod vec2d;
+pub mod vec2;
 pub mod vec3;
 
 pub fn length(n: u64) -> u32 {
