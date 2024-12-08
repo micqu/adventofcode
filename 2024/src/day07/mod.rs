@@ -19,7 +19,7 @@ pub fn part1() -> Option<Solution> {
 pub fn part2() -> Option<Solution> {
     parse()
         .iter()
-        .filter_map(|x| solve2(x.test, 1, x.numbers[0], &x.numbers).then_some(x.test))
+        .filter_map(|x| solve2(x.test, 1, &x.numbers).then_some(x.test))
         .sum::<usize>()
         .solution()
 }
@@ -45,7 +45,34 @@ fn solve(t: usize, i: usize, e: &Vec<usize>) -> bool {
     }
 }
 
-fn solve2(t: usize, i: usize, d: usize, e: &Vec<usize>) -> bool {
+fn solve2(t: usize, i: usize, e: &Vec<usize>) -> bool {
+    if i > e.len() {
+        return false;
+    }
+
+    let d = e[e.len() - i];
+    if d > t {
+        return false;
+    }
+    
+    if d == t {
+        return true;
+    }
+
+    if let Some(r) = is_subnumber(t, d) {
+        if solve2(r, i + 1, e) {
+            return true;
+        }
+    }
+    
+    if t % d == 0 {
+        solve2(t / d, i + 1, e) || solve2(t - d, i + 1, e)
+    } else {
+        solve2(t - d, i + 1, e)
+    }
+}
+
+fn solve2_forward(t: usize, i: usize, d: usize, e: &Vec<usize>) -> bool {
     if i == e.len() {
         return d == t;
     }
@@ -54,9 +81,9 @@ fn solve2(t: usize, i: usize, d: usize, e: &Vec<usize>) -> bool {
         return false;
     }
 
-    solve2(t, i + 1, concat(d, e[i]), e)
-        || solve2(t, i + 1, d * e[i], e)
-        || solve2(t, i + 1, d + e[i], e)
+    solve2_forward(t, i + 1, concat(d, e[i]), e)
+        || solve2_forward(t, i + 1, d * e[i], e)
+        || solve2_forward(t, i + 1, d + e[i], e)
 }
 
 fn concat(a: usize, b: usize) -> usize {
@@ -70,6 +97,14 @@ fn length(mut a: usize) -> u32 {
         i += 1;
     }
     i
+}
+
+fn is_subnumber(a: usize, b: usize) -> Option<usize> {
+    let k = 10usize.pow(length(b));
+    if a % k == b {
+        return Some(a / k)
+    }
+    None
 }
 
 fn parse() -> Vec<Equation> {
