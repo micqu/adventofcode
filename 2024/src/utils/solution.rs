@@ -1,6 +1,6 @@
 use std::fmt::{Display, Formatter};
 
-#[derive(Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Solution {
     I8(i8),
     I16(i16),

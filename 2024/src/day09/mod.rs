@@ -10,6 +10,9 @@ const INPUT: &'static str = include_str!("input.txt");
 
 // pub fn part1() -> Option<Solution> {
 //     let input = parse2();
+//     let i = input.iter();
+//     let j = input.iter().rev();
+
 
 
 //     None
@@ -169,19 +172,11 @@ mod tests {
 
     #[test]
     fn part1() {
-        let result = super::part1().unwrap();
-        match result {
-            Solution::Usize(a) => assert_eq!(a, 6398252054886),
-            _ => panic!(),
-        }
+        assert_eq!(super::part1(), (6398252054886 as usize).solution());
     }
 
     #[test]
     fn part2() {
-        let result = super::part2().unwrap();
-        match result {
-            Solution::Usize(a) => assert_eq!(a, 6415666220005),
-            _ => panic!(),
-        }
+        assert_eq!(super::part2(), (6415666220005 as usize).solution());
     }
 }
