@@ -8,6 +8,13 @@ use crate::utils::{
 pub const TITLE: &str = "Disk Fragmenter";
 const INPUT: &'static str = include_str!("input.txt");
 
+// pub fn part1() -> Option<Solution> {
+//     let input = parse2();
+
+
+//     None
+// }
+
 pub fn part1() -> Option<Solution> {
     let files = parse();
     let mut output = Vec::<File>::with_capacity(files.len());
@@ -66,42 +73,42 @@ pub fn part1() -> Option<Solution> {
 }
 
 pub fn part2() -> Option<Solution> {
-    let mut files = parse();
-    let mut i = files.len() - 1;
-    let mut free: [usize; 10] = [0; 10];
-    loop {
-        let a = &files[i];
-
-        if !a.checked {
-            for j in free[a.size]..i {
-                let b = &files[j];
-                if b.free >= a.size {
-                    free[a.size] = j + 1;
-                    files.insert(
-                        j + 1,
-                        File {
-                            id: a.id,
-                            size: a.size,
-                            free: b.free - a.size,
-                            checked: true,
-                        },
-                    );
-
-                    files[j].free = 0;
-                    files[i].free += files.remove(i + 1).allocated();
-                    i += 1;
-                    break;
-                }
-            }
+    let input = parse2();
+    let mut files = Vec::<(usize, usize, usize)>::new();
+    let mut spaces = Vec::<(usize, usize, usize)>::new();
+    let mut id = 0;
+    let mut offset = 0;
+    for (i, &v) in input.iter().enumerate() {
+        if i % 2 == 0 {
+            files.push((id, v, offset));
+            id += 1;
+        } else {
+            spaces.push((i, v, offset));
         }
-
-        if i == 0 {
-            break;
-        }
-        i -= 1;
+        offset += v;
     }
 
-    checksum(&files).solution()
+    let mut checksum = 0;
+    let mut free: [usize; 10] = [0; 10];
+    for &(i, size, offset) in files.iter().rev() {
+        let mut placed = false;
+        for j in free[size]..i {
+            if spaces[j].1 >= size {
+                free[size] = j;
+                checksum += i * (spaces[j].2 * 2 + size - 1) * size / 2;
+                spaces[j].1 -= size;
+                spaces[j].2 += size;
+                placed = true;
+                break;
+            }
+        }
+        if !placed {
+            checksum += i * (offset * 2 + size - 1) * size / 2;
+            free[size] = usize::MAX;
+        }
+    }
+
+    checksum.solution()
 }
 
 fn checksum(files: &Vec<File>) -> usize {
@@ -128,6 +135,10 @@ impl File {
     fn allocated(&self) -> usize {
         self.size + self.free
     }
+}
+
+fn parse2() -> Vec<usize> {
+    INPUT.bytes().map(|x| (x - b'0') as usize).collect()
 }
 
 fn parse() -> Vec<File> {
