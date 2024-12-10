@@ -153,6 +153,16 @@ impl<T> Vec2d<T> {
             current: 0,
         }
     }
+
+    pub fn positions(&self) -> Positions {
+        Positions {
+            x: 0,
+            y: 0,
+            height: self.height,
+            width: self.width,
+            index: 0,
+        }
+    }
 }
 
 impl<T> std::ops::Index<(usize, usize)> for Vec2d<T> {
@@ -315,5 +325,27 @@ impl Iterator for Diagonals {
 
             return Some((nx as usize, ny as usize));
         }
+    }
+}
+
+pub struct Positions {
+    x: usize,
+    y: usize,
+    height: usize,
+    width: usize,
+    index: usize,
+}
+
+impl Iterator for Positions {
+    type Item = (usize, usize);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.index < self.height * self.width - 1 {
+            self.index += 1;
+        } else {
+            return None;
+        }
+
+        return Some((self.index % self.width, self.index / self.height));
     }
 }

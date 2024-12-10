@@ -14,22 +14,14 @@ pub fn part2() -> Option<Solution> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    
+
     #[test]
     fn part1() {
-        let result = super::part1().unwrap();
-        match result {
-            Solution::U32(a) => assert_eq!(a, 54916),
-            _ => panic!(),
-        }
+        assert_eq!(super::part1(), (472 as usize).solution());
     }
 
     #[test]
     fn part2() {
-        let result = super::part2().unwrap();
-        match result {
-            Solution::U32(a) => assert_eq!(a, 54728),
-            _ => panic!(),
-        }
+        assert_eq!(super::part2(), (969 as usize).solution());
     }
 }
