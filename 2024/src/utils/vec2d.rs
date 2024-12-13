@@ -154,6 +154,16 @@ impl<T> Vec2d<T> {
         }
     }
 
+    pub fn diagonals_point(&self, point: (usize, usize)) -> Diagonals {
+        Diagonals {
+            x: point.0,
+            y: point.1,
+            height: self.height,
+            width: self.width,
+            current: 0,
+        }
+    }
+
     pub fn positions(&self) -> Positions {
         Positions {
             x: 0,
@@ -290,7 +300,7 @@ impl Iterator for FourConnectedUnbound {
 
             self.current += 1;
 
-            return Some((nx, ny, self.current));
+            return Some((nx, ny, self.current - 1));
         }
     }
 }
@@ -306,7 +316,7 @@ pub struct Diagonals {
 }
 
 impl Iterator for Diagonals {
-    type Item = (usize, usize);
+    type Item = (usize, usize, usize);
 
     fn next(&mut self) -> Option<Self::Item> {
         loop {
@@ -323,7 +333,7 @@ impl Iterator for Diagonals {
                 continue;
             }
 
-            return Some((nx as usize, ny as usize));
+            return Some((nx as usize, ny as usize, self.current - 1));
         }
     }
 }
@@ -340,12 +350,14 @@ impl Iterator for Positions {
     type Item = (usize, usize);
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.index < self.height * self.width - 1 {
+        let p = (self.index % self.width, self.index / self.height);
+
+        if self.index < self.height * self.width {
             self.index += 1;
         } else {
             return None;
         }
 
-        return Some((self.index % self.width, self.index / self.height));
+        return Some(p);
     }
 }
