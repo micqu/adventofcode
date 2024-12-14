@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use crate::utils::{
-    point::Point,
+    point2d::Point2d,
     solution::{IntoSolution, Solution},
 };
 

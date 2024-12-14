@@ -1,6 +1,7 @@
 use core::fmt;
+use std::fmt::Display;
 
-use super::point::Point;
+use super::point2d::Point2d;
 
 #[derive(Debug, Clone)]
 pub struct Vec2d<T> {
@@ -90,7 +91,7 @@ impl<T> Vec2d<T> {
         Some((p.0 as usize, p.1 as usize))
     }
 
-    pub fn contains_point(&self, p: &Point) -> bool {
+    pub fn contains_point(&self, p: &Point2d) -> bool {
         !(p.x < 0 || p.x >= self.width as isize || p.y < 0 || p.y >= self.height as isize)
     }
 
@@ -189,17 +190,17 @@ impl<T> std::ops::IndexMut<(usize, usize)> for Vec2d<T> {
     }
 }
 
-impl<T: std::fmt::Debug> std::fmt::Display for Vec2d<T> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let mut str = String::new();
-        for i in 0..self.height {
-            if i != 0 {
-                str.push_str(", ");
-            }
-            str.push_str(&format!("{:?}", &self.row(i)));
-            str.push('\n');
-        }
-        write!(f, "{}", str)
+impl<T> std::ops::Index<Point2d> for Vec2d<T> {
+    fn index(&self, index: Point2d) -> &T {
+        self.index(index.x as usize, index.y as usize)
+    }
+
+    type Output = T;
+}
+
+impl<T> std::ops::IndexMut<Point2d> for Vec2d<T> {
+    fn index_mut(&mut self, index: Point2d) -> &mut T {
+        self.index_mut(index.x as usize, index.y as usize)
     }
 }
 
@@ -359,5 +360,39 @@ impl Iterator for Positions {
         }
 
         return Some(p);
+    }
+}
+
+// impl<T: std::fmt::Debug> std::fmt::Display for Vec2d<T> {
+//     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+//         let mut str = String::new();
+//         for i in 0..self.height {
+//             if i != 0 {
+//                 str.push_str(", ");
+//             }
+//             str.push_str(&format!("{:?}", &self.row(i)));
+//             str.push('\n');
+//         }
+//         write!(f, "{}", str)
+//     }
+// }
+
+impl std::fmt::Display for Vec2d<bool> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let mut str = String::new();
+        for i in 0..self.height {
+            str.push_str(" ");
+            let row = self.row(i);
+            for j in 0..self.width {
+                if row[j] {
+                    str.push('#');
+                } else {
+                    str.push_str(" ");
+                }
+
+            }
+            str.push('\n');
+        }
+        write!(f, "{}", str)
     }
 }

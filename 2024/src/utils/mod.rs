@@ -1,5 +1,7 @@
+use std::io::{stdin, stdout, Read, Write};
+
 pub mod solution;
-pub mod point;
+pub mod point2d;
 pub mod vec2d;
 pub mod vec2;
 pub mod vec3;
@@ -244,4 +246,12 @@ impl<T> Transposable<T> for Vec<Vec<T>> {
             })
             .collect()
     }
+}
+
+
+pub fn pause() {
+    let mut stdout = stdout();
+    stdout.write(b"Press Enter to continue...").unwrap();
+    stdout.flush().unwrap();
+    stdin().read(&mut [0]).unwrap();
 }

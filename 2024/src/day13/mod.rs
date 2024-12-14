@@ -1,10 +1,10 @@
 use crate::utils::{
-    point::Point,
+    point2d::Point2d,
     solution::{IntoSolution, Solution},
     Parsable,
 };
 
-pub const TITLE: &str = "?!";
+pub const TITLE: &str = "Claw Contraption";
 const INPUT: &'static str = include_str!("input.txt");
 
 pub fn part1() -> Option<Solution> {
@@ -55,12 +55,12 @@ fn parse() -> Vec<ClawMachine> {
     let mut numbers = INPUT.bytes();
     while let Some(n) = numbers.next_number() {
         cms.push(ClawMachine {
-            a: Point::new(n, numbers.next_number().unwrap()),
-            b: Point::new(
+            a: Point2d::new(n, numbers.next_number().unwrap()),
+            b: Point2d::new(
                 numbers.next_number().unwrap(),
                 numbers.next_number().unwrap(),
             ),
-            prize: Point::new(
+            prize: Point2d::new(
                 numbers.next_number().unwrap(),
                 numbers.next_number().unwrap(),
             ),
@@ -71,9 +71,9 @@ fn parse() -> Vec<ClawMachine> {
 
 #[derive(Debug)]
 struct ClawMachine {
-    a: Point,
-    b: Point,
-    prize: Point,
+    a: Point2d,
+    b: Point2d,
+    prize: Point2d,
 }
 
 #[cfg(test)]
@@ -82,19 +82,11 @@ mod tests {
 
     #[test]
     fn part1() {
-        let result = super::part1().unwrap();
-        match result {
-            Solution::Usize(a) => assert_eq!(a, 34787),
-            _ => panic!(),
-        }
+        assert_eq!(super::part1(), (34787 as usize).solution());
     }
 
     #[test]
     fn part2() {
-        let result = super::part2().unwrap();
-        match result {
-            Solution::Usize(a) => assert_eq!(a, 85644161121698),
-            _ => panic!(),
-        }
+        assert_eq!(super::part2(), (85644161121698 as usize).solution());
     }
 }
