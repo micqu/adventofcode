@@ -1,5 +1,3 @@
-use itertools::Itertools;
-
 use crate::utils::{
     solution::{IntoSolution, Solution},
     Parsable, ToNumbers,

@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::utils::{solution::{self, IntoSolution, Solution}, Parsable, ToNumbers, Transposable};
+use crate::utils::{solution::{IntoSolution, Solution}, Parsable};
 
 pub const TITLE: &str = "Historian Hysteria";
 const INPUT: &'static str = include_str!("input.txt");

@@ -1,9 +1,4 @@
-use std::collections::HashMap;
-
-use crate::utils::{
-    point2d::Point2d,
-    solution::{IntoSolution, Solution},
-};
+use crate::utils::solution::{IntoSolution, Solution};
 
 pub const TITLE: &str = "Disk Fragmenter";
 const INPUT: &'static str = include_str!("input.txt");
@@ -12,8 +7,6 @@ const INPUT: &'static str = include_str!("input.txt");
 //     let input = parse2();
 //     let i = input.iter();
 //     let j = input.iter().rev();
-
-
 
 //     None
 // }

@@ -1,5 +1,4 @@
 use core::fmt;
-use std::fmt::Display;
 
 use super::point2d::Point2d;
 

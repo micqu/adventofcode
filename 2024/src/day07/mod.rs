@@ -1,4 +1,4 @@
-use std::{collections::HashMap, iter::from_fn};
+use std::iter::from_fn;
 
 use crate::utils::{
     solution::{IntoSolution, Solution},

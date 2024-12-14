@@ -1,9 +1,8 @@
-use std::{collections::HashMap, iter::from_fn};
+use std::collections::HashMap;
 
 use itertools::Itertools;
-use num::zero;
 
-use crate::utils::{solution::{IntoSolution, Solution}, Parsable, ToNumbers};
+use crate::utils::{solution::{IntoSolution, Solution}, Parsable};
 
 pub const TITLE: &str = "Plutonian Pebbles";
 const INPUT: &'static str = include_str!("input.txt");

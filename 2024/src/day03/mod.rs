@@ -1,4 +1,4 @@
-use crate::utils::{solution::{IntoSolution, Solution}, Parsable, ToDigit};
+use crate::utils::{solution::{IntoSolution, Solution}, ToDigit};
 
 pub const TITLE: &str = "Mull It Over";
 const INPUT: &'static str = include_str!("input.txt");

@@ -1,6 +1,6 @@
 use crate::utils::{
     solution::{IntoSolution, Solution},
-    vec2d::{Vec2d, ADJ_FOUR},
+    vec2d::Vec2d,
 };
 
 pub const TITLE: &str = "Hoof It";

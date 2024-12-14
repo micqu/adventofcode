@@ -118,6 +118,7 @@ forward_ref_binop!(impl Sub, sub for Point2d, isize);
 
 
 impl AddAssign for Point2d {
+    #[inline]
     fn add_assign(&mut self, rhs: Self) {
         self.x += rhs.x;
         self.y += rhs.y;
@@ -127,6 +128,7 @@ impl AddAssign for Point2d {
 forward_ref_op_assign!(impl AddAssign, add_assign for Point2d, Point2d);
 
 impl SubAssign for Point2d {
+    #[inline]
     fn sub_assign(&mut self, rhs: Self) {
         self.x -= rhs.x;
         self.y -= rhs.y;
@@ -136,6 +138,7 @@ impl SubAssign for Point2d {
 forward_ref_op_assign!(impl SubAssign, sub_assign for Point2d, Point2d);
 
 impl MulAssign for Point2d {
+    #[inline]
     fn mul_assign(&mut self, rhs: Self) {
         self.x -= rhs.x;
         self.y -= rhs.y;
@@ -146,6 +149,7 @@ forward_ref_op_assign!(impl MulAssign, mul_assign for Point2d, Point2d);
 
 
 impl DivAssign for Point2d {
+    #[inline]
     fn div_assign(&mut self, rhs: Self) {
         self.x -= rhs.x;
         self.y -= rhs.y;

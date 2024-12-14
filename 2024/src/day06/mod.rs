@@ -1,9 +1,8 @@
-use std::collections::{HashMap, HashSet};
-
-use itertools::Itertools;
+use std::collections::HashSet;
 
 use crate::utils::{
-    point2d::Point2d, solution::{IntoSolution, Solution}, vec2d::{Vec2d, ADJ_FOUR}
+    solution::{IntoSolution, Solution},
+    vec2d::{Vec2d, ADJ_FOUR},
 };
 
 pub const TITLE: &str = "Guard Gallivant";
@@ -40,14 +39,18 @@ pub fn part2() -> Option<Solution> {
     let mut dir: usize = 1;
     let mut d = ADJ_FOUR[dir];
     let mut next = (pos.0 + d.0, pos.1 + d.1);
-    let mut seen = Vec2d::new(vec![[false; 4]; map.width * map.height], map.width, map.height);
+    let mut seen = Vec2d::new(
+        vec![[false; 4]; map.width * map.height],
+        map.width,
+        map.height,
+    );
     let mut result = HashSet::<(isize, isize)>::new();
-    
+
     while let Some(n) = map.contains(&next) {
         if seen[n].iter().all(|x| !*x) && check(pos, dir, next, &map, &seen) {
             result.insert(next);
         }
-        
+
         if map[n] == b'#' {
             dir = (dir + 3) % 4;
             d = ADJ_FOUR[dir];
@@ -68,11 +71,15 @@ fn check(
     mut dir: usize,
     obj: (isize, isize),
     map: &Vec2d<u8>,
-    seen: &Vec2d::<[bool; 4]>,
+    seen: &Vec2d<[bool; 4]>,
 ) -> bool {
     let mut d = ADJ_FOUR[dir];
     let mut next = (pos.0 + d.0, pos.1 + d.1);
-    let mut inner_seen = Vec2d::new(vec![[false; 4]; map.width * map.height], map.width, map.height);
+    let mut inner_seen = Vec2d::new(
+        vec![[false; 4]; map.width * map.height],
+        map.width,
+        map.height,
+    );
     inner_seen[(pos.0 as usize, pos.1 as usize)][dir] = true;
 
     while let Some(n) = map.contains(&next) {
@@ -88,7 +95,7 @@ fn check(
         if seen[c][dir] || inner_seen[c][dir] {
             return true;
         }
-        
+
         inner_seen[c][dir] = true;
         next = (pos.0 + d.0, pos.1 + d.1);
     }
@@ -127,7 +134,7 @@ fn parse() -> ((isize, isize), Vec2d<u8>) {
 //         let mut line = line.bytes();
 //         while let Some(c) = line.next() {
 //             if c == b'#' {
-                
+
 //             }
 //             x += 1;
 //         }
