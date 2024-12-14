@@ -13,8 +13,7 @@ const INPUT: &'static str = include_str!("input.txt");
 
 pub fn part1() -> Option<Solution> {
     let robots = parse();
-    let w = 101;
-    let h = 103;
+    let (w, h): (isize, isize) = (101, 103);
     let mut quadrant = [0; 4];
     for r in robots {
         let mut t: Point2d = r.pos + r.vel * 100;
@@ -34,32 +33,36 @@ pub fn part1() -> Option<Solution> {
 
 pub fn part2() -> Option<Solution> {
     let mut robots = parse();
-    let w: isize = 101;
-    let h: isize = 103;
-    for i in 1..(w * h + 1) as usize {
+    let (w, h): (isize, isize) = (101, 103);
+    let mut s = usize::MAX;
+    let mut id = -1;
+    for i in 0..w * h {
         for r in &mut robots {
             r.pos += r.vel;
             r.pos.x = r.pos.x.rem_euclid(w);
             r.pos.y = r.pos.y.rem_euclid(h);
         }
 
-        let mut map = Vec2d::<bool>::new(vec![false; (w * h) as usize], w as usize, h as usize);
-        for r in &mut robots {
-            map[r.pos] = true;
-        }
-
-        let mut score = 0;
-        for r in &robots {
-            if r.pos.x < w / 2 && map[r.pos] == map[((w - r.pos.x - 1) as usize, r.pos.y as usize)] {
-                score += 1;
-            }
-        }
-
-        if score > 50 {
-            return i.solution();
+        let v = variance(&robots);
+        if v < s {
+            s = v;
+            id = i + 1;
         }
     }
-    None
+    id.solution()
+}
+
+fn variance(robots: &Vec<Robot>) -> usize {
+    let c = centroid(robots);
+    let mut s = 0;
+    for r in robots {
+        s += r.pos.x.abs_diff(c.x) * r.pos.y.abs_diff(c.y);
+    }
+    s
+}
+
+fn centroid(robots: &Vec<Robot>) -> Point2d {
+    robots.iter().map(|x| x.pos).sum::<Point2d>() / robots.len() as isize
 }
 
 fn parse() -> Vec<Robot> {
@@ -90,6 +93,6 @@ mod tests {
 
     #[test]
     fn part2() {
-        assert_eq!(super::part2(), (6888 as usize).solution());
+        assert_eq!(super::part2(), (6888 as isize).solution());
     }
 }

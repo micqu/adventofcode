@@ -3,8 +3,7 @@ use std::collections::{HashMap, HashSet};
 use itertools::Itertools;
 
 use crate::utils::{
-    solution::{IntoSolution, Solution},
-    vec2d::{Vec2d, ADJ_FOUR},
+    point2d::Point2d, solution::{IntoSolution, Solution}, vec2d::{Vec2d, ADJ_FOUR}
 };
 
 pub const TITLE: &str = "Guard Gallivant";
@@ -115,6 +114,28 @@ fn parse() -> ((isize, isize), Vec2d<u8>) {
 
     (start, Vec2d::from_vec_height(k, h))
 }
+
+// fn parse2() -> ((isize, isize), Vec2d<[(Point, usize); 4]>) {
+//     let w = INPUT.lines().next().unwrap().len();
+//     let h = INPUT.lines().count();
+//     let mut start: (isize, isize) = (0, 0);
+//     let mut map = Vec2d::<[(Point, usize); 4]>::new(Vec::new(), w, h);
+
+//     let mut y = 0;
+//     for line in INPUT.lines() {
+//         let mut x = 0;
+//         let mut line = line.bytes();
+//         while let Some(c) = line.next() {
+//             if c == b'#' {
+                
+//             }
+//             x += 1;
+//         }
+//         y += 1;
+//     }
+
+//     (start, map)
+// }
 
 #[cfg(test)]
 mod tests {

@@ -1,4 +1,4 @@
-use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
+use std::{iter::Sum, ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign}};
 
 use forward_ref::{forward_ref_binop, forward_ref_op_assign};
 
@@ -153,3 +153,14 @@ impl DivAssign for Point2d {
 }
 
 forward_ref_op_assign!(impl DivAssign, div_assign for Point2d, Point2d);
+
+impl Sum for Point2d {
+    fn sum<I: Iterator<Item = Self>>(iter: I) -> Self {
+        let (mut x, mut y) = (0, 0);
+        for p in iter {
+            x += p.x;
+            y += p.y;
+        }
+        Point2d::new(x, y)
+    }
+}
