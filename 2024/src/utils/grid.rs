@@ -3,13 +3,24 @@ use core::fmt;
 use super::point2d::Point2d;
 
 #[derive(Debug, Clone)]
-pub struct Vec2d<T> {
+pub struct Grid<T> {
     pub data: Vec<T>,
     pub width: usize,
     pub height: usize,
 }
 
-impl<T> Vec2d<T> {
+impl<T> Grid<T> {
+    pub fn from(value: T, width: usize, height: usize) -> Self
+    where
+        T: Clone,
+    {
+        Self {
+            height,
+            width,
+            data: vec![value; width * height],
+        }
+    }
+
     pub fn from_vec_width(vec: Vec<T>, width: usize) -> Self {
         Self {
             height: vec.len() / width,
@@ -175,7 +186,7 @@ impl<T> Vec2d<T> {
     }
 }
 
-impl<T> std::ops::Index<(usize, usize)> for Vec2d<T> {
+impl<T> std::ops::Index<(usize, usize)> for Grid<T> {
     fn index(&self, index: (usize, usize)) -> &T {
         self.index(index.0, index.1)
     }
@@ -183,13 +194,27 @@ impl<T> std::ops::Index<(usize, usize)> for Vec2d<T> {
     type Output = T;
 }
 
-impl<T> std::ops::IndexMut<(usize, usize)> for Vec2d<T> {
+impl<T> std::ops::IndexMut<(usize, usize)> for Grid<T> {
     fn index_mut(&mut self, index: (usize, usize)) -> &mut T {
         self.index_mut(index.0, index.1)
     }
 }
 
-impl<T> std::ops::Index<Point2d> for Vec2d<T> {
+impl<T> std::ops::Index<(isize, isize)> for Grid<T> {
+    fn index(&self, index: (isize, isize)) -> &T {
+        self.index(index.0 as usize, index.1 as usize)
+    }
+
+    type Output = T;
+}
+
+impl<T> std::ops::IndexMut<(isize, isize)> for Grid<T> {
+    fn index_mut(&mut self, index: (isize, isize)) -> &mut T {
+        self.index_mut(index.0 as usize, index.1 as usize)
+    }
+}
+
+impl<T> std::ops::Index<Point2d> for Grid<T> {
     fn index(&self, index: Point2d) -> &T {
         self.index(index.x as usize, index.y as usize)
     }
@@ -197,8 +222,22 @@ impl<T> std::ops::Index<Point2d> for Vec2d<T> {
     type Output = T;
 }
 
-impl<T> std::ops::IndexMut<Point2d> for Vec2d<T> {
+impl<T> std::ops::IndexMut<Point2d> for Grid<T> {
     fn index_mut(&mut self, index: Point2d) -> &mut T {
+        self.index_mut(index.x as usize, index.y as usize)
+    }
+}
+
+impl<T> std::ops::Index<&Point2d> for Grid<T> {
+    fn index(&self, index: &Point2d) -> &T {
+        self.index(index.x as usize, index.y as usize)
+    }
+
+    type Output = T;
+}
+
+impl<T> std::ops::IndexMut<&Point2d> for Grid<T> {
+    fn index_mut(&mut self, index: &Point2d) -> &mut T {
         self.index_mut(index.x as usize, index.y as usize)
     }
 }
@@ -376,7 +415,7 @@ impl Iterator for Positions {
 //     }
 // }
 
-impl std::fmt::Display for Vec2d<bool> {
+impl std::fmt::Display for Grid<bool> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut str = String::new();
         for i in 0..self.height {
@@ -388,7 +427,6 @@ impl std::fmt::Display for Vec2d<bool> {
                 } else {
                     str.push_str(" ");
                 }
-
             }
             str.push('\n');
         }

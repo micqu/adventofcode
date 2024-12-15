@@ -1,6 +1,6 @@
 use crate::utils::{
     solution::{IntoSolution, Solution},
-    vec2d::Vec2d,
+    grid::Grid,
 };
 
 pub const TITLE: &str = "Resonant Collinearity";
@@ -8,7 +8,7 @@ const INPUT: &'static str = include_str!("input.txt");
 
 pub fn part1() -> Option<Solution> {
     let (antennas, w, h) = parse();
-    let mut antinodes = Vec2d::<bool>::from_vec_width(vec![false; w * h], w);
+    let mut antinodes = Grid::<bool>::from_vec_width(vec![false; w * h], w);
     let mut s = 0;
     for chs in antennas.into_iter().filter_map(|x| x) {
         for i in 0..chs.len() - 1 {
@@ -42,7 +42,7 @@ pub fn part1() -> Option<Solution> {
 
 pub fn part2() -> Option<Solution> {
     let (antennas, w, h) = parse();
-    let mut antinodes = Vec2d::<bool>::from_vec_width(vec![false; w * h], w);
+    let mut antinodes = Grid::<bool>::from_vec_width(vec![false; w * h], w);
     let mut s = 0;
     for chs in antennas.into_iter().filter_map(|x| x) {
         for i in 0..chs.len() - 1 {

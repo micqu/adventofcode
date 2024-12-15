@@ -1,6 +1,6 @@
 use crate::utils::{
     solution::{IntoSolution, Solution},
-    vec2d::Vec2d,
+    grid::Grid,
 };
 
 pub const TITLE: &str = "Hoof It";
@@ -34,7 +34,7 @@ pub fn part2() -> Option<Solution> {
     s.solution()
 }
 
-fn solve(pos: (usize, usize), i: u8, map: &Vec2d<u8>, seen: &mut Vec<usize>) -> usize {
+fn solve(pos: (usize, usize), i: u8, map: &Grid<u8>, seen: &mut Vec<usize>) -> usize {
     if i == 9 && !seen.contains(&(pos.0 * map.width + pos.1)) {
         seen.push(pos.0 * map.width + pos.1);
         return 1;
@@ -49,7 +49,7 @@ fn solve(pos: (usize, usize), i: u8, map: &Vec2d<u8>, seen: &mut Vec<usize>) -> 
     s
 }
 
-fn solve2(pos: (usize, usize), i: u8, map: &Vec2d<u8>) -> usize {
+fn solve2(pos: (usize, usize), i: u8, map: &Grid<u8>) -> usize {
     if i == 9 {
         return 1;
     }
@@ -63,7 +63,7 @@ fn solve2(pos: (usize, usize), i: u8, map: &Vec2d<u8>) -> usize {
     s
 }
 
-fn parse() -> Vec2d<u8> {
+fn parse() -> Grid<u8> {
     let mut h: usize = 0;
     let k = INPUT
         .lines()
@@ -72,7 +72,7 @@ fn parse() -> Vec2d<u8> {
         .flatten()
         .collect();
 
-    Vec2d::from_vec_height(k, h)
+    Grid::from_vec_height(k, h)
 }
 
 #[cfg(test)]

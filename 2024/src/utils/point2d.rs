@@ -35,11 +35,15 @@ impl Point2d {
         self
     }
 
+    pub fn determinant(&self, other: &Self) -> isize {
+        self.x * other.y - other.x * self.y
+    }
+
     pub fn parse<T>(iter: &mut T) -> Self
     where
         T: IntoIterator<Item = u8> + Parsable<isize>
     {
-        Point2d {
+        Self {
             x: iter.next_number().unwrap(),
             y: iter.next_number().unwrap(),
         }

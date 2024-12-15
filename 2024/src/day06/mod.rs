@@ -1,8 +1,9 @@
 use std::collections::HashSet;
 
 use crate::utils::{
+    point2d::Point2d,
     solution::{IntoSolution, Solution},
-    vec2d::{Vec2d, ADJ_FOUR},
+    grid::{Grid, ADJ_FOUR},
 };
 
 pub const TITLE: &str = "Guard Gallivant";
@@ -10,13 +11,13 @@ const INPUT: &'static str = include_str!("input.txt");
 
 pub fn part1() -> Option<Solution> {
     let (start, map) = parse();
-    let mut seen = Vec2d::new(vec![0; map.width * map.height], map.width, map.height);
-    seen[(start.0 as usize, start.1 as usize)] = 1;
+    let mut seen = Grid::from(0, map.width, map.height);
+    seen[(start.x as usize, start.y as usize)] = 1;
 
     let mut pos = start;
     let mut dir = 1;
     let mut d = ADJ_FOUR[dir];
-    let mut next = (pos.0 + d.0, pos.1 + d.1);
+    let mut next = (pos.x + d.0, pos.y + d.1);
 
     while let Some(n) = map.contains(&next) {
         if map[n] == b'#' {
@@ -24,11 +25,11 @@ pub fn part1() -> Option<Solution> {
             d = ADJ_FOUR[dir];
         } else {
             seen[n] = 1;
-            pos.0 += d.0;
-            pos.1 += d.1;
+            pos.x += d.0;
+            pos.y += d.1;
         }
 
-        next = (pos.0 as isize + d.0, pos.1 as isize + d.1);
+        next = (pos.x + d.0, pos.y + d.1);
     }
 
     seen.data.iter().sum::<usize>().solution()
@@ -38,12 +39,8 @@ pub fn part2() -> Option<Solution> {
     let (mut pos, map) = parse();
     let mut dir: usize = 1;
     let mut d = ADJ_FOUR[dir];
-    let mut next = (pos.0 + d.0, pos.1 + d.1);
-    let mut seen = Vec2d::new(
-        vec![[false; 4]; map.width * map.height],
-        map.width,
-        map.height,
-    );
+    let mut next = (pos.x + d.0, pos.y + d.1);
+    let mut seen = Grid::from([false; 4], map.width, map.height);
     let mut result = HashSet::<(isize, isize)>::new();
 
     while let Some(n) = map.contains(&next) {
@@ -55,63 +52,58 @@ pub fn part2() -> Option<Solution> {
             dir = (dir + 3) % 4;
             d = ADJ_FOUR[dir];
         } else {
-            pos.0 += d.0;
-            pos.1 += d.1;
+            pos.x += d.0;
+            pos.y += d.1;
         }
 
-        seen[(pos.0 as usize, pos.1 as usize)][dir] = true;
-        next = (pos.0 + d.0, pos.1 + d.1);
+        seen[pos][dir] = true;
+        next = (pos.x + d.0, pos.y + d.1);
     }
 
     result.len().solution()
 }
 
 fn check(
-    mut pos: (isize, isize),
+    mut pos: Point2d,
     mut dir: usize,
     obj: (isize, isize),
-    map: &Vec2d<u8>,
-    seen: &Vec2d<[bool; 4]>,
+    map: &Grid<u8>,
+    seen: &Grid<[bool; 4]>,
 ) -> bool {
     let mut d = ADJ_FOUR[dir];
-    let mut next = (pos.0 + d.0, pos.1 + d.1);
-    let mut inner_seen = Vec2d::new(
-        vec![[false; 4]; map.width * map.height],
-        map.width,
-        map.height,
-    );
-    inner_seen[(pos.0 as usize, pos.1 as usize)][dir] = true;
+    let mut next = (pos.x + d.0, pos.y + d.1);
+    let mut inner_seen = Grid::from([false; 4], map.width, map.height);
+    inner_seen[pos][dir] = true;
 
     while let Some(n) = map.contains(&next) {
         if map[n] == b'#' || next == obj {
             dir = (dir + 3) % 4;
             d = ADJ_FOUR[dir];
         } else {
-            pos.0 += d.0;
-            pos.1 += d.1;
+            pos.x += d.0;
+            pos.y += d.1;
         }
 
-        let c = (pos.0 as usize, pos.1 as usize);
-        if seen[c][dir] || inner_seen[c][dir] {
+        if seen[pos][dir] || inner_seen[pos][dir] {
             return true;
         }
 
-        inner_seen[c][dir] = true;
-        next = (pos.0 + d.0, pos.1 + d.1);
+        inner_seen[pos][dir] = true;
+        next = (pos.x + d.0, pos.y + d.1);
     }
 
     false
 }
 
-fn parse() -> ((isize, isize), Vec2d<u8>) {
-    let mut start: (isize, isize) = (0, 0);
+fn parse() -> (Point2d, Grid<u8>) {
+    let mut start = Point2d::new(0, 0);
     let mut h: usize = 0;
     let k = INPUT
         .lines()
         .inspect(|x| {
             if let Some(s) = x.find('^') {
-                start.0 = s as isize;
-                start.1 = h as isize;
+                start.x = s as isize;
+                start.y = h as isize;
             }
             h += 1;
         })
@@ -119,7 +111,7 @@ fn parse() -> ((isize, isize), Vec2d<u8>) {
         .flatten()
         .collect();
 
-    (start, Vec2d::from_vec_height(k, h))
+    (start, Grid::from_vec_height(k, h))
 }
 
 // fn parse2() -> ((isize, isize), Vec2d<[(Point, usize); 4]>) {
@@ -150,19 +142,11 @@ mod tests {
 
     #[test]
     fn part1() {
-        let result = super::part1().unwrap();
-        match result {
-            Solution::Usize(a) => assert_eq!(a, 4939),
-            _ => panic!(),
-        }
+        assert_eq!(super::part1(), (4939 as usize).solution());
     }
 
     #[test]
     fn part2() {
-        let result = super::part2().unwrap();
-        match result {
-            Solution::Usize(a) => assert_eq!(a, 1434),
-            _ => panic!(),
-        }
+        assert_eq!(super::part2(), (1434 as usize).solution());
     }
 }

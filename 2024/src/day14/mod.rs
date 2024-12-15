@@ -1,7 +1,5 @@
 use crate::utils::{
-    mod_inv,
-    point2d::Point2d,
-    solution::{IntoSolution, Solution},
+    math::mod_inv, point2d::Point2d, solution::{IntoSolution, Solution}
 };
 
 pub const TITLE: &str = "Restroom Redoubt";

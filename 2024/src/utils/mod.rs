@@ -1,8 +1,9 @@
 use std::io::{stdin, stdout, Read, Write};
 
-pub mod solution;
+pub mod math;
 pub mod point2d;
-pub mod vec2d;
+pub mod solution;
+pub mod grid;
 pub mod vec2;
 pub mod vec3;
 
@@ -254,21 +255,4 @@ pub fn pause() {
     stdout.write(b"Press Enter to continue...").unwrap();
     stdout.flush().unwrap();
     stdin().read(&mut [0]).unwrap();
-}
-
-// solve ax = 1 (mod m)
-pub fn mod_inv(a: isize, m: isize) -> isize {
-    let mut mn = (m, a);
-    let mut xy = (0, 1);
-
-    while mn.1 != 0 {
-        xy = (xy.1, xy.0 - (mn.0 / mn.1) * xy.1);
-        mn = (mn.1, mn.0 % mn.1);
-    }
-
-    while xy.0 < 0 {
-        xy.0 += m;
-    }
-
-    xy.0
 }

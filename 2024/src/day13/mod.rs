@@ -11,7 +11,7 @@ pub fn part1() -> Option<Solution> {
     let cs = parse();
     let mut s = 0;
     for c in cs {
-        let d = det(c.a.x, c.b.y, c.b.x, c.a.y);
+        let d = c.a.determinant(&c.b);
         let dx = det(c.prize.x, c.b.y, c.b.x, c.prize.y);
         let dy = det(c.a.x, c.prize.y, c.prize.x, c.a.y);
         if dx % d == 0 && dy % d == 0 {
@@ -33,7 +33,7 @@ pub fn part2() -> Option<Solution> {
     for mut c in cs {
         c.prize.x += 10000000000000;
         c.prize.y += 10000000000000;
-        let d = det(c.a.x, c.b.y, c.b.x, c.a.y);
+        let d = c.a.determinant(&c.b);
         let dx = det(c.prize.x, c.b.y, c.b.x, c.prize.y);
         let dy = det(c.a.x, c.prize.y, c.prize.x, c.a.y);
         if dx % d == 0 && dy % d == 0 {
@@ -56,14 +56,8 @@ fn parse() -> Vec<ClawMachine> {
     while let Some(n) = numbers.next_number() {
         cms.push(ClawMachine {
             a: Point2d::new(n, numbers.next_number().unwrap()),
-            b: Point2d::new(
-                numbers.next_number().unwrap(),
-                numbers.next_number().unwrap(),
-            ),
-            prize: Point2d::new(
-                numbers.next_number().unwrap(),
-                numbers.next_number().unwrap(),
-            ),
+            b: Point2d::parse(&mut numbers),
+            prize: Point2d::parse(&mut numbers),
         });
     }
     cms

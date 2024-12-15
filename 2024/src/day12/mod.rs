@@ -1,6 +1,6 @@
 use crate::utils::{
     solution::{IntoSolution, Solution},
-    vec2d::Vec2d,
+    grid::Grid,
 };
 
 pub const TITLE: &str = "Garden Groups";
@@ -8,7 +8,7 @@ const INPUT: &'static str = include_str!("input.txt");
 
 pub fn part1() -> Option<Solution> {
     let map = parse();
-    let mut seen = Vec2d::from_vec_width(vec![false; map.data.len()], map.width);
+    let mut seen = Grid::from_vec_width(vec![false; map.data.len()], map.width);
     map.positions()
         .map(|(x, y)| {
             if !seen[(x, y)] {
@@ -23,7 +23,7 @@ pub fn part1() -> Option<Solution> {
 
 pub fn part2() -> Option<Solution> {
     let map = parse();
-    let mut seen = Vec2d::from_vec_width(vec![false; map.data.len()], map.width);
+    let mut seen = Grid::from_vec_width(vec![false; map.data.len()], map.width);
     map.positions()
         .map(|(x, y)| {
             if !seen[(x, y)] {
@@ -36,7 +36,7 @@ pub fn part2() -> Option<Solution> {
         .solution()
 }
 
-fn fill(p: (usize, usize), map: &Vec2d<u8>, seen: &mut Vec2d<bool>) -> (usize, usize) {
+fn fill(p: (usize, usize), map: &Grid<u8>, seen: &mut Grid<bool>) -> (usize, usize) {
     seen[p] = true;
     let mut perimeter = 4;
     let mut area = 1;
@@ -54,7 +54,7 @@ fn fill(p: (usize, usize), map: &Vec2d<u8>, seen: &mut Vec2d<bool>) -> (usize, u
     (perimeter, area)
 }
 
-fn fill2(p: (usize, usize), map: &Vec2d<u8>, seen: &mut Vec2d<bool>) -> (usize, usize) {
+fn fill2(p: (usize, usize), map: &Grid<u8>, seen: &mut Grid<bool>) -> (usize, usize) {
     seen[p] = true;
     let mut area = 1;
     let mut corners = 0;
@@ -113,7 +113,7 @@ fn fill2(p: (usize, usize), map: &Vec2d<u8>, seen: &mut Vec2d<bool>) -> (usize, 
     (corners, area)
 }
 
-fn parse() -> Vec2d<u8> {
+fn parse() -> Grid<u8> {
     let mut h: usize = 0;
     let k = INPUT
         .lines()
@@ -122,7 +122,7 @@ fn parse() -> Vec2d<u8> {
         .flatten()
         .collect();
 
-    Vec2d::from_vec_height(k, h)
+    Grid::from_vec_height(k, h)
 }
 
 #[cfg(test)]
