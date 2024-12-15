@@ -1,6 +1,8 @@
 use core::fmt;
 
-use super::point2d::Point2d;
+use crate::utils::points::point2d::Point2d;
+
+use super::iterators::{Diagonals, EightConnected, FourConnected, FourConnectedUnbound, Positions};
 
 #[derive(Debug, Clone)]
 pub struct Grid<T> {
@@ -93,7 +95,15 @@ impl<T> Grid<T> {
         Some((x - 1, y))
     }
 
-    pub fn contains(&self, p: &(isize, isize)) -> Option<(usize, usize)> {
+    pub fn contains(&self, x: isize, y: isize) -> Option<(usize, usize)> {
+        if x < 0 || x >= self.width as isize || y < 0 || y >= self.height as isize {
+            return None;
+        }
+
+        Some((x as usize, y as usize))
+    }
+
+    pub fn contains_point(&self, p: &(isize, isize)) -> Option<(usize, usize)> {
         if p.0 < 0 || p.0 >= self.width as isize || p.1 < 0 || p.1 >= self.height as isize {
             return None;
         }
@@ -101,7 +111,7 @@ impl<T> Grid<T> {
         Some((p.0 as usize, p.1 as usize))
     }
 
-    pub fn contains_point(&self, p: &Point2d) -> bool {
+    pub fn contains_point2d(&self, p: &Point2d) -> bool {
         !(p.x < 0 || p.x >= self.width as isize || p.y < 0 || p.y >= self.height as isize)
     }
 
@@ -139,6 +149,16 @@ impl<T> Grid<T> {
         FourConnected {
             x: point.0,
             y: point.1,
+            height: self.height,
+            width: self.width,
+            current: 0,
+        }
+    }
+
+    pub fn four_connected_point2d(&self, point: &Point2d) -> FourConnected {
+        FourConnected {
+            x: point.x as usize,
+            y: point.y as usize,
             height: self.height,
             width: self.width,
             current: 0,
@@ -242,165 +262,6 @@ impl<T> std::ops::IndexMut<&Point2d> for Grid<T> {
     }
 }
 
-pub const ADJ_EIGHT: [(isize, isize); 8] = [
-    (1, 0),
-    (1, -1),
-    (0, -1),
-    (-1, -1),
-    (-1, 0),
-    (-1, 1),
-    (0, 1),
-    (1, 1),
-];
-
-pub struct EightConnected {
-    x: usize,
-    y: usize,
-    height: usize,
-    width: usize,
-    current: usize,
-}
-
-impl Iterator for EightConnected {
-    type Item = (usize, usize);
-
-    fn next(&mut self) -> Option<Self::Item> {
-        loop {
-            if self.current > 7 {
-                return None;
-            }
-
-            let nx = self.x as isize + ADJ_EIGHT[self.current].0;
-            let ny = self.y as isize + ADJ_EIGHT[self.current].1;
-
-            self.current += 1;
-
-            if nx < 0 || nx >= self.width as isize || ny < 0 || ny >= self.height as isize {
-                continue;
-            }
-
-            return Some((nx as usize, ny as usize));
-        }
-    }
-}
-
-pub const ADJ_FOUR: [(isize, isize); 4] = [(1, 0), (0, -1), (-1, 0), (0, 1)];
-
-pub struct FourConnected {
-    x: usize,
-    y: usize,
-    height: usize,
-    width: usize,
-    current: usize,
-}
-
-impl Iterator for FourConnected {
-    type Item = (usize, usize, usize);
-
-    fn next(&mut self) -> Option<Self::Item> {
-        loop {
-            if self.current > 3 {
-                return None;
-            }
-
-            let nx = self.x as isize + ADJ_FOUR[self.current].0;
-            let ny = self.y as isize + ADJ_FOUR[self.current].1;
-
-            self.current += 1;
-
-            if nx < 0 || nx >= self.width as isize || ny < 0 || ny >= self.height as isize {
-                continue;
-            }
-
-            return Some((nx as usize, ny as usize, self.current - 1));
-        }
-    }
-}
-
-pub struct FourConnectedUnbound {
-    x: isize,
-    y: isize,
-    height: usize,
-    width: usize,
-    current: usize,
-}
-
-impl Iterator for FourConnectedUnbound {
-    type Item = (isize, isize, usize);
-
-    fn next(&mut self) -> Option<Self::Item> {
-        loop {
-            if self.current > 3 {
-                return None;
-            }
-
-            let nx = self.x + ADJ_FOUR[self.current].0;
-            let ny = self.y + ADJ_FOUR[self.current].1;
-
-            self.current += 1;
-
-            return Some((nx, ny, self.current - 1));
-        }
-    }
-}
-
-pub const ADJ_DIAGONAL: [(isize, isize); 4] = [(1, -1), (-1, -1), (-1, 1), (1, 1)];
-
-pub struct Diagonals {
-    x: usize,
-    y: usize,
-    height: usize,
-    width: usize,
-    current: usize,
-}
-
-impl Iterator for Diagonals {
-    type Item = (usize, usize, usize);
-
-    fn next(&mut self) -> Option<Self::Item> {
-        loop {
-            if self.current > 3 {
-                return None;
-            }
-
-            let nx = self.x as isize + ADJ_DIAGONAL[self.current].0;
-            let ny = self.y as isize + ADJ_DIAGONAL[self.current].1;
-
-            self.current += 1;
-
-            if nx < 0 || nx >= self.width as isize || ny < 0 || ny >= self.height as isize {
-                continue;
-            }
-
-            return Some((nx as usize, ny as usize, self.current - 1));
-        }
-    }
-}
-
-pub struct Positions {
-    x: usize,
-    y: usize,
-    height: usize,
-    width: usize,
-    index: usize,
-}
-
-impl Iterator for Positions {
-    type Item = (usize, usize);
-
-    fn next(&mut self) -> Option<Self::Item> {
-        let p = (self.index % self.width, self.index / self.height);
-
-        if self.index < self.height * self.width {
-            self.index += 1;
-        } else {
-            return None;
-        }
-
-        return Some(p);
-    }
-}
-
 // impl<T: std::fmt::Debug> std::fmt::Display for Vec2d<T> {
 //     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
 //         let mut str = String::new();
@@ -427,6 +288,23 @@ impl std::fmt::Display for Grid<bool> {
                 } else {
                     str.push_str(" ");
                 }
+            }
+            str.push('\n');
+        }
+        write!(f, "{}", str)
+    }
+}
+
+
+impl std::fmt::Display for Grid<u8> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let mut str = String::new();
+        for i in 0..self.height {
+            str.push_str(" ");
+            let row = self.row(i);
+            for j in 0..self.width {
+                let byte = row[j];
+                str.push(byte as char);
             }
             str.push('\n');
         }

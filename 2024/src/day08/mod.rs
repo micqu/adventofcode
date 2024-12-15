@@ -1,6 +1,6 @@
 use crate::utils::{
     solution::{IntoSolution, Solution},
-    grid::Grid,
+    grid::grid::Grid,
 };
 
 pub const TITLE: &str = "Resonant Collinearity";
@@ -19,7 +19,7 @@ pub fn part1() -> Option<Solution> {
 
                 let d = (b.0 - a.0, b.1 - a.1);
                 let aa = (a.0 - d.0, a.1 - d.1);
-                if let Some(p) = antinodes.contains(&aa) {
+                if let Some(p) = antinodes.contains_point(&aa) {
                     if !antinodes[p] {
                         s += 1;
                         antinodes[p] = true;
@@ -27,7 +27,7 @@ pub fn part1() -> Option<Solution> {
                 }
 
                 let bb = (b.0 + d.0, b.1 + d.1);
-                if let Some(p) = antinodes.contains(&bb) {
+                if let Some(p) = antinodes.contains_point(&bb) {
                     if !antinodes[p] {
                         s += 1;
                         antinodes[p] = true;
@@ -55,7 +55,7 @@ pub fn part2() -> Option<Solution> {
 
                 let d = (b.0 - a.0, b.1 - a.1);
                 let mut aa = (a.0 - d.0, a.1 - d.1);
-                while let Some(p) = antinodes.contains(&aa) {
+                while let Some(p) = antinodes.contains_point(&aa) {
                     if !antinodes[p] {
                         s += 1;
                         antinodes[p] = true;
@@ -64,7 +64,7 @@ pub fn part2() -> Option<Solution> {
                 }
 
                 let mut bb = (b.0 + d.0, b.1 + d.1);
-                while let Some(p) = antinodes.contains(&bb) {
+                while let Some(p) = antinodes.contains_point(&bb) {
                     if !antinodes[p] {
                         s += 1;
                         antinodes[p] = true;

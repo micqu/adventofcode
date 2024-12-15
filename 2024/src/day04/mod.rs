@@ -1,8 +1,11 @@
 use itertools::Itertools;
 
 use crate::utils::{
+    grid::{
+        grid::Grid,
+        iterators::{ADJ_DIAGONAL, ADJ_EIGHT},
+    },
     solution::{IntoSolution, Solution},
-    grid::{Grid, ADJ_DIAGONAL, ADJ_EIGHT},
 };
 
 pub const TITLE: &str = "Ceres Search";
@@ -20,7 +23,9 @@ pub fn part1() -> Option<Solution> {
 
             for (dx, dy) in ADJ_EIGHT {
                 for k in 1..4 {
-                    if let Some((x, y)) = m.contains(&(i as isize + dx * k, j as isize + dy * k)) {
+                    if let Some((x, y)) =
+                        m.contains_point(&(i as isize + dx * k, j as isize + dy * k))
+                    {
                         if m[(x as usize, y as usize)] != xmas[k as usize] {
                             break;
                         }
@@ -49,14 +54,14 @@ pub fn part2() -> Option<Solution> {
             let mut c = 0;
             for k in 0..2 {
                 let (dx, dy) = ADJ_DIAGONAL[k];
-                if let Some((x, y)) = m.contains(&(i + dx, j + dy)) {
+                if let Some((x, y)) = m.contains_point(&(i + dx, j + dy)) {
                     let p = m[(x, y)];
                     if p != b'S' && p != b'M' {
                         break;
                     }
 
                     let (dx2, dy2) = ADJ_DIAGONAL[k + 2];
-                    if let Some((x2, y2)) = m.contains(&(i + dx2, j + dy2)) {
+                    if let Some((x2, y2)) = m.contains_point(&(i + dx2, j + dy2)) {
                         let p2 = m[(x2, y2)];
                         if p2 != b'S' && p2 != b'M' {
                             break;

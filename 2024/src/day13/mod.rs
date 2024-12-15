@@ -1,5 +1,5 @@
 use crate::utils::{
-    point2d::Point2d,
+    points::point2d::Point2d,
     solution::{IntoSolution, Solution},
     Parsable,
 };

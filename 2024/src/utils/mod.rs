@@ -1,9 +1,9 @@
 use std::io::{stdin, stdout, Read, Write};
 
-pub mod math;
-pub mod point2d;
-pub mod solution;
 pub mod grid;
+pub mod math;
+pub mod points;
+pub mod solution;
 pub mod vec2;
 pub mod vec3;
 
@@ -248,7 +248,6 @@ impl<T> Transposable<T> for Vec<Vec<T>> {
             .collect()
     }
 }
-
 
 pub fn pause() {
     let mut stdout = stdout();

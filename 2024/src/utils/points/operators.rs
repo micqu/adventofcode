@@ -2,53 +2,7 @@ use std::{iter::Sum, ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, 
 
 use forward_ref::{forward_ref_binop, forward_ref_op_assign};
 
-use super::Parsable;
-
-#[derive(Debug, PartialEq, Clone, Copy)]
-pub struct Point2d {
-    pub x: isize,
-    pub y: isize,
-}
-
-impl Point2d {
-    pub fn new(x: isize, y: isize) -> Self {
-        Self { x, y }
-    }
-    
-    pub fn up(&mut self) -> &Self {
-        self.y -= 1;
-        self
-    }
-
-    pub fn down(&mut self) -> &Self {
-        self.y += 1;
-        self
-    }
-
-    pub fn left(&mut self) -> &Self {
-        self.x -= 1;
-        self
-    }
-
-    pub fn right(&mut self) -> &Self {
-        self.x += 1;
-        self
-    }
-
-    pub fn determinant(&self, other: &Self) -> isize {
-        self.x * other.y - other.x * self.y
-    }
-
-    pub fn parse<T>(iter: &mut T) -> Self
-    where
-        T: IntoIterator<Item = u8> + Parsable<isize>
-    {
-        Self {
-            x: iter.next_number().unwrap(),
-            y: iter.next_number().unwrap(),
-        }
-    }
-}
+use super::point2d::Point2d;
 
 impl Add for Point2d {
     type Output = Self;
@@ -172,3 +126,12 @@ impl Sum for Point2d {
         Point2d::new(x, y)
     }
 }
+
+// impl AddAssign<(isize, isize)> for Point2d {
+//     fn add_assign(&mut self, rhs: (isize, isize)) {
+//         self.x += rhs.0;
+//         self.y += rhs.1;
+//     }
+// }
+
+// forward_ref_op_assign!(impl AddAssign, add_assign for Point2d, (isize, isize));

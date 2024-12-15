@@ -1,6 +1,6 @@
 use crate::utils::{
     solution::{IntoSolution, Solution},
-    grid::Grid,
+    grid::grid::Grid,
 };
 
 pub const TITLE: &str = "Hoof It";

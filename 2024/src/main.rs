@@ -9,7 +9,7 @@ use std::{
 };
 
 use itertools::Itertools;
-use utils::solution::*;
+use utils::solution::Solution;
 
 mod day01;
 mod day02;

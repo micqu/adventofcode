@@ -1,6 +1,6 @@
 use crate::utils::{
+    grid::grid::Grid,
     solution::{IntoSolution, Solution},
-    grid::Grid,
 };
 
 pub const TITLE: &str = "Garden Groups";
