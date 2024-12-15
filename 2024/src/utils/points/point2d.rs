@@ -11,7 +11,7 @@ impl Point2d {
         Self { x, y }
     }
     
-    pub fn dir(&self, dir: usize) -> Self {
+    pub fn move_dir(&self, dir: usize) -> Self {
         let d = ADJ_FOUR[dir];
         Self {
             x: self.x + d.0,
