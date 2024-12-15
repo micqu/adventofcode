@@ -15,7 +15,7 @@ const INPUT: &'static str = include_str!("input.txt");
 pub fn part1() -> Option<Solution> {
     let (mut pos, mut map, moves) = parse();
     for m in moves {
-        let n = Point2d::move_dir(&pos, m);
+        let n = Point2d::dir4(&pos, m);
         if map.contains_point2d(&n) {
             match map[n] {
                 b'.' => {
@@ -32,7 +32,7 @@ pub fn part1() -> Option<Solution> {
                             pos = n;
                             break;
                         }
-                        t = Point2d::move_dir(&t, m);
+                        t = Point2d::dir4(&t, m);
                         c = map[t];
                     }
                 }
@@ -51,7 +51,7 @@ pub fn part1() -> Option<Solution> {
 pub fn part2() -> Option<Solution> {
     let (mut pos, mut map, moves) = parse2();
     for m in moves {
-        let n = Point2d::move_dir(&pos, m);
+        let n = Point2d::dir4(&pos, m);
         if map.contains_point2d(&n) {
             match map[n] {
                 b'.' => {
@@ -85,14 +85,9 @@ fn can_push(prev: &Point2d, c: &Point2d, m: usize, map: &mut Grid<u8>) -> bool {
         return false;
     }
 
-    let next = Point2d::move_dir(c, m);
+    let next = Point2d::dir4(c, m);
     if m % 2 == 1 {
-        let other = if map[c] == b'[' {
-            Point2d::move_dir(c, 0)
-        } else {
-            Point2d::move_dir(c, 2)
-        };
-
+        let other = if map[c] == b'[' { c.right() } else { c.left() };
         if *prev != other {
             return can_push(c, &other, m, map) && can_push(c, &next, m, map);
         }
@@ -105,20 +100,14 @@ fn push(prev: &Point2d, c: &Point2d, m: usize, map: &mut Grid<u8>) {
         return;
     }
 
-    let next = Point2d::move_dir(c, m);
+    let next = Point2d::dir4(c, m);
     if m % 2 == 1 {
-        let other = if map[c] == b'[' {
-            Point2d::move_dir(c, 0)
-        } else {
-            Point2d::move_dir(c, 2)
-        };
-
+        let other = if map[c] == b'[' { c.right() } else { c.left() };
         if *prev != other {
             push(c, &other, m, map);
         }
     }
     push(c, &next, m, map);
-
     map[next] = map[c];
     map[c] = b'.';
 }
