@@ -19,12 +19,12 @@ pub fn part1() -> Option<Solution> {
     let mut d = ADJ_FOUR[dir];
     let mut next = (pos.x + d.0, pos.y + d.1);
 
-    while let Some(n) = map.contains_point(&next) {
-        if map[n] == b'#' {
+    while map.contains_point(&next) {
+        if map[next] == b'#' {
             dir = (dir + 3) % 4;
             d = ADJ_FOUR[dir];
         } else {
-            seen[n] = 1;
+            seen[next] = 1;
             pos.x += d.0;
             pos.y += d.1;
         }
@@ -43,12 +43,12 @@ pub fn part2() -> Option<Solution> {
     let mut seen = map.same_size_with([false; 4]);
     let mut result = HashSet::<(isize, isize)>::new();
 
-    while let Some(n) = map.contains_point(&next) {
-        if seen[n].iter().all(|x| !*x) && check(pos, dir, next, &map, &seen) {
+    while map.contains_point(&next) {
+        if seen[next].iter().all(|x| !*x) && check(pos, dir, next, &map, &seen) {
             result.insert(next);
         }
 
-        if map[n] == b'#' {
+        if map[next] == b'#' {
             dir = (dir + 3) % 4;
             d = ADJ_FOUR[dir];
         } else {
@@ -75,8 +75,8 @@ fn check(
     let mut inner_seen = map.same_size_with([false; 4]);
     inner_seen[pos][dir] = true;
 
-    while let Some(n) = map.contains_point(&next) {
-        if map[n] == b'#' || next == obj {
+    while map.contains_point(&next) {
+        if map[next] == b'#' || next == obj {
             dir = (dir + 3) % 4;
             d = ADJ_FOUR[dir];
         } else {

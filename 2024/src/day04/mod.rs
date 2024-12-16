@@ -12,7 +12,7 @@ pub const TITLE: &str = "Ceres Search";
 const INPUT: &'static str = include_str!("input.txt");
 
 pub fn part1() -> Option<Solution> {
-    let m = parse();
+    let m = Grid::parse(INPUT);
     let xmas: [u8; 4] = [b'X', b'M', b'A', b'S'];
     let mut s = 0;
     for i in 0..m.width {
@@ -23,10 +23,10 @@ pub fn part1() -> Option<Solution> {
 
             for (dx, dy) in ADJ_EIGHT {
                 for k in 1..4 {
-                    if let Some((x, y)) =
-                        m.contains_point(&(i as isize + dx * k, j as isize + dy * k))
+                    let n = (i as isize + dx * k, j as isize + dy * k);
+                    if m.contains_point(&n)
                     {
-                        if m[(x as usize, y as usize)] != xmas[k as usize] {
+                        if m[n] != xmas[k as usize] {
                             break;
                         }
 
@@ -43,7 +43,7 @@ pub fn part1() -> Option<Solution> {
 }
 
 pub fn part2() -> Option<Solution> {
-    let m = parse();
+    let m = Grid::parse(INPUT);
     let mut s = 0;
     for i in 0..m.width as isize {
         for j in 0..m.height as isize {
@@ -54,15 +54,17 @@ pub fn part2() -> Option<Solution> {
             let mut c = 0;
             for k in 0..2 {
                 let (dx, dy) = ADJ_DIAGONAL[k];
-                if let Some((x, y)) = m.contains_point(&(i + dx, j + dy)) {
-                    let p = m[(x, y)];
+                let n = (i + dx, j + dy);
+                if m.contains_point(&n) {
+                    let p = m[n];
                     if p != b'S' && p != b'M' {
                         break;
                     }
 
                     let (dx2, dy2) = ADJ_DIAGONAL[k + 2];
-                    if let Some((x2, y2)) = m.contains_point(&(i + dx2, j + dy2)) {
-                        let p2 = m[(x2, y2)];
+                    let n2 = (i + dx2, j + dy2);
+                    if m.contains_point(&n2) {
+                        let p2 = m[n2];
                         if p2 != b'S' && p2 != b'M' {
                             break;
                         }

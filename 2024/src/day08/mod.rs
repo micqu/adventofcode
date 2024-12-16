@@ -19,18 +19,18 @@ pub fn part1() -> Option<Solution> {
 
                 let d = (b.0 - a.0, b.1 - a.1);
                 let aa = (a.0 - d.0, a.1 - d.1);
-                if let Some(p) = antinodes.contains_point(&aa) {
-                    if !antinodes[p] {
+                if antinodes.contains_point(&aa) {
+                    if !antinodes[aa] {
+                        antinodes[aa] = true;
                         s += 1;
-                        antinodes[p] = true;
                     }
                 }
 
                 let bb = (b.0 + d.0, b.1 + d.1);
-                if let Some(p) = antinodes.contains_point(&bb) {
-                    if !antinodes[p] {
+                if antinodes.contains_point(&bb) {
+                    if !antinodes[bb] {
+                        antinodes[bb] = true;
                         s += 1;
-                        antinodes[p] = true;
                     }
                 }
             }
@@ -47,33 +47,32 @@ pub fn part2() -> Option<Solution> {
     for chs in antennas.into_iter().filter_map(|x| x) {
         for i in 0..chs.len() - 1 {
             let a = chs[i];
-            antinodes[(a.0 as usize, a.1 as usize)] = true;
 
             for j in (i + 1)..chs.len() {
                 let b = chs[j];
-                antinodes[(b.0 as usize, b.1 as usize)] = true;
 
                 let d = (b.0 - a.0, b.1 - a.1);
-                let mut aa = (a.0 - d.0, a.1 - d.1);
-                while let Some(p) = antinodes.contains_point(&aa) {
-                    if !antinodes[p] {
+                let mut aa = a;
+                while antinodes.contains_point(&aa) {
+                    if !antinodes[aa] {
+                        antinodes[aa] = true;
                         s += 1;
-                        antinodes[p] = true;
                     }
                     aa = (aa.0 - d.0, aa.1 - d.1);
                 }
 
-                let mut bb = (b.0 + d.0, b.1 + d.1);
-                while let Some(p) = antinodes.contains_point(&bb) {
-                    if !antinodes[p] {
+                let mut bb = b;
+                while antinodes.contains_point(&bb) {
+                    if !antinodes[bb] {
+                        antinodes[bb] = true;
                         s += 1;
-                        antinodes[p] = true;
                     }
                     bb = (bb.0 + d.0, bb.1 + d.1);
                 }
             }
         }
     }
+    println!("{}", antinodes);
 
     s.solution()
 }
@@ -106,19 +105,11 @@ mod tests {
 
     #[test]
     fn part1() {
-        let result = super::part1().unwrap();
-        match result {
-            Solution::Usize(a) => assert_eq!(a, 327),
-            _ => panic!(),
-        }
+        assert_eq!(super::part1(), (327 as i32).solution());
     }
 
     #[test]
     fn part2() {
-        let result = super::part2().unwrap();
-        match result {
-            Solution::Usize(a) => assert_eq!(a, 1233),
-            _ => panic!(),
-        }
+        assert_eq!(super::part2(), (1233 as i32).solution());
     }
 }

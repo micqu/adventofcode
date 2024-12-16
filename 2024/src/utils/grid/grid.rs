@@ -11,12 +11,26 @@ pub struct Grid<T> {
     pub height: usize,
 }
 
+impl Grid<u8> {
+    pub fn parse(input: &str) -> Self {
+        let mut h = 0;
+        let k = input
+            .lines()
+            .inspect(|_| h += 1)
+            .map(|x| x.bytes())
+            .flatten()
+            .collect();
+        
+        Grid::<u8>::from_vec_height(k, h)
+    }
+}
+
 impl<T> Grid<T> {
     pub fn same_size_with<TNew>(&self, value: TNew) -> Grid<TNew>
     where
         TNew: Clone,
     {
-        Grid::<TNew> {
+        Grid {
             height: self.height,
             width: self.width,
             data: vec![value; self.width * self.height],
@@ -95,20 +109,12 @@ impl<T> Grid<T> {
         Some((x - 1, y))
     }
 
-    pub fn contains(&self, x: isize, y: isize) -> Option<(usize, usize)> {
-        if x < 0 || x >= self.width as isize || y < 0 || y >= self.height as isize {
-            return None;
-        }
-
-        Some((x as usize, y as usize))
+    pub fn contains(&self, x: isize, y: isize) -> bool {
+        !(x < 0 || x >= self.width as isize || y < 0 || y >= self.height as isize)
     }
 
-    pub fn contains_point(&self, p: &(isize, isize)) -> Option<(usize, usize)> {
-        if p.0 < 0 || p.0 >= self.width as isize || p.1 < 0 || p.1 >= self.height as isize {
-            return None;
-        }
-
-        Some((p.0 as usize, p.1 as usize))
+    pub fn contains_point(&self, p: &(isize, isize)) -> bool {
+        !(p.0 < 0 || p.0 >= self.width as isize || p.1 < 0 || p.1 >= self.height as isize)
     }
 
     pub fn contains_point2d(&self, p: &Point2d) -> bool {
@@ -310,3 +316,89 @@ impl std::fmt::Display for Grid<u8> {
         write!(f, "{}", str)
     }
 }
+
+// fn walk(p: Point2d, end: &Point2d, mut d: usize, map: &Grid<u8>) -> Option<WalkResult> {
+//     let mut turns = 0;
+//     let mut steps = 0;
+//     let mut current = p;
+//     loop {
+//         if current == *end {
+//             return Some(WalkResult {
+//                 pos: current,
+//                 dir: d,
+//                 steps: steps,
+//                 turns: turns,
+//             });
+//         }
+
+//         let mut n = current.dir4(d);
+//         let empty = count_empty_paths(&current, d, map);
+//         match empty {
+//             0 => {
+//                 return None;
+//             }
+//             1 => {
+//                 if map[n] == b'#' {
+//                     if let Some(ed) = get_first_empty_path(&current, d, map) {
+//                         turns += 1;
+//                         d = ed;
+//                         n = current.dir4(d);
+//                     }
+//                 }
+//             }
+//             _ => {
+//                 if current == p {
+//                     return None;
+//                 }
+
+//                 return Some(WalkResult {
+//                     pos: current,
+//                     dir: d,
+//                     steps: steps,
+//                     turns: turns,
+//                 });
+//             }
+//         }
+//         current = n;
+//         steps += 1;
+//     }
+// }
+
+// #[derive(Debug)]
+// struct WalkResult {
+//     pos: Point2d,
+//     dir: usize,
+//     steps: usize,
+//     turns: usize,
+// }
+
+// fn get_first_empty_path(p: &Point2d, d: usize, map: &Grid<u8>) -> Option<usize> {
+//     for (nx, ny, nd) in map.four_connected_point2d(p) {
+//         if (nd + 2) % 4 == d {
+//             continue;
+//         }
+
+//         if map[(nx, ny)] == b'#' {
+//             continue;
+//         }
+
+//         return Some(nd);
+//     }
+//     None
+// }
+
+// fn count_empty_paths(p: &Point2d, d: usize, map: &Grid<u8>) -> usize {
+//     let mut empty = 0;
+//     for (nx, ny, nd) in map.four_connected_point2d(p) {
+//         if (nd + 2) % 4 == d {
+//             continue;
+//         }
+
+//         if map[(nx, ny)] == b'#' {
+//             continue;
+//         }
+
+//         empty += 1;
+//     }
+//     empty
+// }

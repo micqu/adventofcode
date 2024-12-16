@@ -1,9 +1,9 @@
-use std::collections::{BinaryHeap, HashMap};
+use std::collections::{BinaryHeap, HashMap, VecDeque};
 
 use itertools::Itertools;
 
 use crate::utils::{
-    grid::grid::Grid,
+    grid::{grid::Grid, iterators::ADJ_FOUR},
     points::point2d::Point2d,
     solution::{IntoSolution, Solution},
 };
@@ -18,21 +18,23 @@ pub fn part1() -> Option<Solution> {
 
 pub fn part2() -> Option<Solution> {
     let (start, end, map) = parse();
-    let mut seen = map.same_size_with(false);
-    let mut tiles = map.same_size_with(false);
-    tiles[end] = true;
-
-    let best = solve(&start, &end, &map).unwrap();
-    let mut costs = map.same_size_with([usize::MAX; 4]);
-    solve2(
-        &start, &end, 0, 0, best, &map, &mut seen, &mut tiles, &mut costs,
-    );
-
+    let (min_cost, mut costs) = solve2(&start, &end, &map).unwrap();
+    let tiles = backwards(&start, &end, min_cost, &map, &mut costs);
     tiles.data.iter().filter(|x| **x).count().solution()
+
+    // let (start, end, map) = parse();
+    // let mut seen = map.same_size_with(false);
+    // let mut tiles = map.same_size_with(false);
+    // tiles[end] = true;
+
+    // let best = solve(&start, &end, &map).unwrap();
+    // let mut costs = map.same_size_with([isize::MAX; 4]);
+    // solve2(&start, &end, 0, 0, best, &map, &mut seen, &mut tiles, &mut costs);
+    // tiles.data.iter().filter(|x| **x).count().solution()
 }
 
-fn solve(p: &Point2d, end: &Point2d, map: &Grid<u8>) -> Option<usize> {
-    let mut costs = map.same_size_with(usize::MAX);
+fn solve(p: &Point2d, end: &Point2d, map: &Grid<u8>) -> Option<isize> {
+    let mut costs = map.same_size_with(isize::MAX);
     costs[*p] = 0;
 
     let mut q = BinaryHeap::<State>::new();
@@ -53,16 +55,12 @@ fn solve(p: &Point2d, end: &Point2d, map: &Grid<u8>) -> Option<usize> {
 
         for (nx, ny, nd) in map.four_connected_point2d(&u.pos) {
             let n = Point2d::new(nx as isize, ny as isize);
-            if map[n] == b'#' {
-                continue;
-            }
-
-            if (nd + 2 % 4) == nd {
+            if map[n] == b'#' || (nd + 2 % 4) == nd {
                 continue;
             }
 
             let d = u.dir.abs_diff(nd) % 2;
-            let c = u.cost + d * 1000 + 1;
+            let c = u.cost + (d * 1000) as isize + 1;
             if c < costs[n] {
                 costs[n] = c;
                 q.push(State {
@@ -77,51 +75,133 @@ fn solve(p: &Point2d, end: &Point2d, map: &Grid<u8>) -> Option<usize> {
 }
 
 fn solve2(
-    p: &Point2d,
+    start: &Point2d,
     end: &Point2d,
-    cost: usize,
-    dir: usize,
-    best: usize,
     map: &Grid<u8>,
-    seen: &mut Grid<bool>,
-    tiles: &mut Grid<bool>,
-    costs: &mut Grid<[usize; 4]>,
-) -> bool {
-    if p == end {
-        return true;
-    }
+) -> Option<(isize, Grid<[isize; 4]>)> {
+    let mut q = BinaryHeap::<State>::new();
+    q.push(State {
+        pos: *start,
+        cost: 0,
+        dir: 0,
+    });
 
-    seen[p] = true;
-    let mut found = false;
-    for (nx, ny, nd) in map.four_connected_point2d(p) {
-        let n = Point2d::new(nx as isize, ny as isize);
-
-        if map[n] == b'#' || seen[n] {
+    let mut costs = map.same_size_with([isize::MAX; 4]);
+    costs[start][0] = 0;
+    
+    let mut min_cost = isize::MAX;
+    while let Some(u) = q.pop() {
+        if u.pos == *end {
+            min_cost = min_cost.min(u.cost);
             continue;
         }
 
-        if (nd + 2 % 4) == dir {
+        if u.cost > costs[u.pos][u.dir] {
             continue;
         }
 
-        let d = dir.abs_diff(nd) % 2;
-        let c = cost + d * 1000 + 1;
-        if c <= best && c <= costs[n][nd] {
-            if solve2(&n, end, c, nd, best, map, seen, tiles, costs) {
-                tiles[p] = true;
-                found = true;
+        let next = [
+            (u.pos, (u.dir + 1) % 4, u.cost + 1000),
+            (u.pos, (u.dir + 3) % 4, u.cost + 1000),
+            (u.pos.dir4(u.dir), u.dir, u.cost + 1),
+        ];
+
+        for (n, nd, nc) in next {
+            if map[n] != b'#' && nc < costs[n][nd] {
+                costs[n][nd] = nc;
+                q.push(State {
+                    pos: n,
+                    cost: nc,
+                    dir: nd,
+                });
             }
-            costs[n][nd] = c;
         }
     }
-    seen[p] = false;
-    found
+
+    (min_cost != isize::MAX).then_some((min_cost, costs))
 }
+
+fn backwards(
+    start: &Point2d,
+    end: &Point2d,
+    min_cost: isize,
+    map: &Grid<u8>,
+    costs: &mut Grid<[isize; 4]>,
+) -> Grid<bool> {
+    let mut tiles = map.same_size_with(false);
+    let mut q = VecDeque::new();
+    for d in 0..4 {
+        if costs[end][d] == min_cost {
+            q.push_back((*end, d, min_cost));
+        }
+    }
+
+    while let Some((pos, dir, cost)) = q.pop_front() {
+        tiles[pos] = true;
+
+        if pos == *start {
+            continue;
+        }
+
+        let next = [
+            (pos, (dir + 1) % 4, cost - 1000),
+            (pos, (dir + 3) % 4, cost - 1000),
+            (pos.dir4((dir + 2) % 4), dir, cost - 1),
+        ];
+
+        for (n, nd, nc) in next {
+            if nc == costs[n][nd] {
+                q.push_back((n, nd, nc));
+                costs[n][nd] = isize::MAX;
+            }
+        }
+    }
+
+    tiles
+}
+
+// fn solve2(
+//     p: &Point2d,
+//     end: &Point2d,
+//     cost: isize,
+//     dir: isize,
+//     best: isize,
+//     map: &Grid<u8>,
+//     seen: &mut Grid<bool>,
+//     tiles: &mut Grid<bool>,
+//     costs: &mut Grid<[isize; 4]>,
+// ) -> bool {
+//     if p == end {
+//         return true;
+//     }
+
+//     seen[p] = true;
+//     let mut found = false;
+//     for (nx, ny, nd) in map.four_connected_point2d(p) {
+//         let n = Point2d::new(nx as isize, ny as isize);
+
+//         if map[n] == b'#' || seen[n] || (nd + 2 % 4) == dir {
+//             continue;
+//         }
+
+//         let d = dir.abs_diff(nd) % 2;
+//         let c = cost + d * 1000 + 1;
+//         if c <= best && c <= costs[n][nd] {
+//             if solve2(&n, end, c, nd, best, map, seen, tiles, costs) {
+//                 tiles[p] = true;
+//                 found = true;
+//             }
+//             costs[n][nd] = c;
+//         }
+//     }
+//     seen[p] = false;
+//     found
+// }
 
 #[derive(Debug, Eq, PartialEq)]
 struct State {
     pos: Point2d,
-    cost: usize,
+    cost: isize,
     dir: usize,
 }
 
@@ -164,7 +244,7 @@ mod tests {
 
     #[test]
     fn part1() {
-        assert_eq!(super::part1(), (93436 as usize).solution());
+        assert_eq!(super::part1(), (93436 as isize).solution());
     }
 
     #[test]
