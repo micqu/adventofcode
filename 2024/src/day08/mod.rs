@@ -72,7 +72,6 @@ pub fn part2() -> Option<Solution> {
             }
         }
     }
-    println!("{}", antinodes);
 
     s.solution()
 }

@@ -20,15 +20,15 @@ impl Grid<u8> {
             .map(|x| x.bytes())
             .flatten()
             .collect();
-        
+
         Grid::<u8>::from_vec_height(k, h)
     }
 }
 
 impl<T> Grid<T> {
-    pub fn same_size_with<TNew>(&self, value: TNew) -> Grid<TNew>
+    pub fn same_size_with<U>(&self, value: U) -> Grid<U>
     where
-        TNew: Clone,
+        U: Clone,
     {
         Grid {
             height: self.height,
@@ -36,7 +36,21 @@ impl<T> Grid<T> {
             data: vec![value; self.width * self.height],
         }
     }
-    
+
+    pub fn find(&self, value: T) -> Option<Point2d>
+    where
+        T: std::cmp::PartialEq,
+    {
+        if let Some(i) = self.data.iter().position(|x| *x == value) {
+            Some(Point2d::new(
+                (i % self.width) as isize,
+                (i / self.width) as isize,
+            ))
+        } else {
+            None
+        }
+    }
+
     pub fn from_vec_width(vec: Vec<T>, width: usize) -> Self {
         Self {
             height: vec.len() / width,
