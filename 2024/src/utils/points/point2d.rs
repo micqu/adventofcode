@@ -1,6 +1,6 @@
 use crate::utils::{grid::iterators::ADJ_FOUR, Parsable};
 
-#[derive(Debug, PartialEq, Clone, Copy)]
+#[derive(Debug, Eq, PartialEq, Clone, Copy, PartialOrd, Ord)]
 pub struct Point2d {
     pub x: isize,
     pub y: isize,

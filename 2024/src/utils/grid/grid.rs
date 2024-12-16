@@ -12,17 +12,17 @@ pub struct Grid<T> {
 }
 
 impl<T> Grid<T> {
-    pub fn from(value: T, width: usize, height: usize) -> Self
+    pub fn same_size_with<TNew>(&self, value: TNew) -> Grid<TNew>
     where
-        T: Clone,
+        TNew: Clone,
     {
-        Self {
-            height,
-            width,
-            data: vec![value; width * height],
+        Grid::<TNew> {
+            height: self.height,
+            width: self.width,
+            data: vec![value; self.width * self.height],
         }
     }
-
+    
     pub fn from_vec_width(vec: Vec<T>, width: usize) -> Self {
         Self {
             height: vec.len() / width,
@@ -294,7 +294,6 @@ impl std::fmt::Display for Grid<bool> {
         write!(f, "{}", str)
     }
 }
-
 
 impl std::fmt::Display for Grid<u8> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

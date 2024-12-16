@@ -11,7 +11,7 @@ const INPUT: &'static str = include_str!("input.txt");
 
 pub fn part1() -> Option<Solution> {
     let (start, map) = parse();
-    let mut seen = Grid::from(0, map.width, map.height);
+    let mut seen = map.same_size_with(0);
     seen[(start.x as usize, start.y as usize)] = 1;
 
     let mut pos = start;
@@ -40,7 +40,7 @@ pub fn part2() -> Option<Solution> {
     let mut dir: usize = 1;
     let mut d = ADJ_FOUR[dir];
     let mut next = (pos.x + d.0, pos.y + d.1);
-    let mut seen = Grid::from([false; 4], map.width, map.height);
+    let mut seen = map.same_size_with([false; 4]);
     let mut result = HashSet::<(isize, isize)>::new();
 
     while let Some(n) = map.contains_point(&next) {
@@ -72,7 +72,7 @@ fn check(
 ) -> bool {
     let mut d = ADJ_FOUR[dir];
     let mut next = (pos.x + d.0, pos.y + d.1);
-    let mut inner_seen = Grid::from([false; 4], map.width, map.height);
+    let mut inner_seen = map.same_size_with([false; 4]);
     inner_seen[pos][dir] = true;
 
     while let Some(n) = map.contains_point(&next) {
