@@ -306,7 +306,7 @@ impl std::fmt::Display for Grid<bool> {
                 if row[j] {
                     str.push('#');
                 } else {
-                    str.push_str(" ");
+                    str.push_str(".");
                 }
             }
             str.push('\n');

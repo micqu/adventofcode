@@ -41,28 +41,28 @@ impl Point2d {
     pub fn up(&self) -> Self {
         Self {
             x: self.x,
-            y: self.y - 1
+            y: self.y - 1,
         }
     }
 
     pub fn down(&self) -> Self {
         Self {
             x: self.x,
-            y: self.y + 1
+            y: self.y + 1,
         }
     }
 
     pub fn left(&self) -> Self {
         Self {
             x: self.x - 1,
-            y: self.y
+            y: self.y,
         }
     }
 
     pub fn right(&self) -> Self {
         Self {
             x: self.x + 1,
-            y: self.y
+            y: self.y,
         }
     }
 
@@ -80,11 +80,21 @@ impl Point2d {
 
     pub fn parse<T>(iter: &mut T) -> Self
     where
-        T: IntoIterator<Item = u8> + Parsable<isize>
+        T: IntoIterator<Item = u8> + Parsable<isize>,
     {
         Self {
             x: iter.next_number().unwrap(),
             y: iter.next_number().unwrap(),
         }
+    }
+
+    pub fn try_parse<T>(iter: &mut T) -> Option<Self>
+    where
+        T: IntoIterator<Item = u8> + Parsable<isize>,
+    {
+        if let Some((x, y)) = iter.next_number().zip(iter.next_number()) {
+            return Some(Self { x, y });
+        }
+        None
     }
 }

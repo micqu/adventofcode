@@ -1,4 +1,4 @@
-use std::collections::{BinaryHeap, HashMap, VecDeque};
+use std::collections::BinaryHeap;
 
 use itertools::Itertools;
 
@@ -34,8 +34,8 @@ pub fn part2() -> Option<Solution> {
 }
 
 fn solve(p: &Point2d, end: &Point2d, map: &Grid<u8>) -> Option<isize> {
-    let mut costs = map.same_size_with(isize::MAX);
-    costs[*p] = 0;
+    let mut costs = map.same_size_with([isize::MAX; 4]);
+    costs[*p][0] = 0;
 
     let mut q = BinaryHeap::<State>::new();
     q.push(State {
@@ -49,7 +49,7 @@ fn solve(p: &Point2d, end: &Point2d, map: &Grid<u8>) -> Option<isize> {
             return Some(u.cost);
         }
 
-        if u.cost > costs[u.pos] {
+        if u.cost > costs[u.pos][u.dir] {
             continue;
         }
 
@@ -61,8 +61,8 @@ fn solve(p: &Point2d, end: &Point2d, map: &Grid<u8>) -> Option<isize> {
 
             let d = u.dir.abs_diff(nd) % 2;
             let c = u.cost + (d * 1000) as isize + 1;
-            if c < costs[n] {
-                costs[n] = c;
+            if c < costs[n][nd] {
+                costs[n][nd] = c;
                 q.push(State {
                     pos: n,
                     cost: c,
@@ -129,14 +129,14 @@ fn backwards(
     costs: &mut Grid<[isize; 4]>,
 ) -> Grid<bool> {
     let mut tiles = map.same_size_with(false);
-    let mut q = VecDeque::new();
+    let mut q = Vec::new();
     for d in 0..4 {
         if costs[end][d] == min_cost {
-            q.push_back((*end, d, min_cost));
+            q.push((*end, d, min_cost));
         }
     }
 
-    while let Some((pos, dir, cost)) = q.pop_front() {
+    while let Some((pos, dir, cost)) = q.pop() {
         tiles[pos] = true;
 
         if pos == *start {
@@ -151,7 +151,7 @@ fn backwards(
 
         for (n, nd, nc) in next {
             if nc == costs[n][nd] {
-                q.push_back((n, nd, nc));
+                q.push((n, nd, nc));
                 costs[n][nd] = isize::MAX;
             }
         }

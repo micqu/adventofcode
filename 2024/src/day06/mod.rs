@@ -2,7 +2,7 @@ use std::collections::HashSet;
 
 use crate::utils::{
     grid::{grid::Grid, iterators::ADJ_FOUR},
-    points::point2d::Point2d,
+    points::point2d::{self, Point2d},
     solution::{IntoSolution, Solution},
 };
 
@@ -36,6 +36,9 @@ pub fn part1() -> Option<Solution> {
 }
 
 pub fn part2() -> Option<Solution> {
+    // let (start, map, jump) = parse2();
+    // dbg!(jump);
+    // None
     let (mut pos, map) = parse();
     let mut dir: usize = 1;
     let mut d = ADJ_FOUR[dir];
@@ -114,27 +117,64 @@ fn parse() -> (Point2d, Grid<u8>) {
     (start, Grid::from_vec_height(k, h))
 }
 
-// fn parse2() -> ((isize, isize), Vec2d<[(Point, usize); 4]>) {
-//     let w = INPUT.lines().next().unwrap().len();
-//     let h = INPUT.lines().count();
-//     let mut start: (isize, isize) = (0, 0);
-//     let mut map = Vec2d::<[(Point, usize); 4]>::new(Vec::new(), w, h);
+fn parse2() -> (Point2d, Grid<u8>, Grid<[Option<Point2d>; 4]>) {
+    let w = INPUT.lines().next().unwrap().len();
+    let h = INPUT.lines().count();
+    let mut map = Grid::new(Vec::new(), w, h);
+    let mut jump: Grid<[Option<Point2d>; 4]> = Grid::new(Vec::new(), w, h);
+    let mut start = Point2d::new(0, 0);
 
-//     let mut y = 0;
-//     for line in INPUT.lines() {
-//         let mut x = 0;
-//         let mut line = line.bytes();
-//         while let Some(c) = line.next() {
-//             if c == b'#' {
+    let mut y = 0;
+    for line in INPUT.lines() {
+        let mut x = 0;
+        let mut line = line.bytes();
+        while let Some(c) = line.next() {
+            if c == b'^' {
+                start.x = x;
+                start.y = y;
+            }
 
-//             }
-//             x += 1;
-//         }
-//         y += 1;
-//     }
+            if c == b'#' {
+                let current_point = Point2d::new(x, y);
+                set(current_point, 2, Some(Point2d::new(x, y)), &map, &mut jump);
+                set(current_point, 1, Some(Point2d::new(x, y)), &map, &mut jump);
+            }
 
-//     (start, map)
-// }
+            map.data.push(c);
+            x += 1;
+        }
+
+        y += 1;
+    }
+
+    for i in 0..w as isize {
+        let u = Point2d::new(i, 0);
+        let d = Point2d::new(i, h as isize - 1);
+        set(u, 1, Some(u), &map, &mut jump);
+        set(d, 3, Some(d), &map, &mut jump);
+    }
+
+    for j in 0..h as isize {
+        let l = Point2d::new(0, j);
+        let r = Point2d::new(w as isize - 1, j);
+        set(l, 2, Some(l), &map, &mut jump);
+        set(r, 0, Some(r), &map, &mut jump);
+    }
+
+    (start, map, jump)
+}
+
+fn set(p: Point2d, d: usize, value: Option<Point2d>, map: &Grid<u8>, jump: &mut Grid<[Option<Point2d>; 4]>) {
+    let mut t = p;
+    
+    while map.contains_point2d(&t) {
+        if map[t] == b'#' {
+            break;
+        }
+        jump[t][d] = value;
+        t.move_dir4(d);
+    }
+}
 
 #[cfg(test)]
 mod tests {
