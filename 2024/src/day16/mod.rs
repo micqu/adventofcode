@@ -53,8 +53,7 @@ fn solve(p: &Point2d, end: &Point2d, map: &Grid<u8>) -> Option<isize> {
             continue;
         }
 
-        for (nx, ny, nd) in map.four_connected_point2d(&u.pos) {
-            let n = Point2d::new(nx as isize, ny as isize);
+        for (n, nd) in map.four_connected_point2d(&u.pos) {
             if map[n] == b'#' || (nd + 2 % 4) == nd {
                 continue;
             }

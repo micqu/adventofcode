@@ -2,7 +2,7 @@ use core::fmt;
 
 use crate::utils::points::point2d::Point2d;
 
-use super::iterators::{Diagonals, EightConnected, FourConnected, FourConnectedUnbound, Positions};
+use super::iterators::{Diagonals, EightConnected, FourConnected, FourConnectedPoint2d, FourConnectedUnbound, Positions};
 
 #[derive(Debug, Clone)]
 pub struct Grid<T> {
@@ -25,10 +25,19 @@ impl Grid<u8> {
     }
 }
 
+impl<T: Clone> Grid<T> {
+    pub fn new_with(value: T, width: usize, height: usize) -> Self
+    {
+        Self {
+            data: vec![value; width * height],
+            width,
+            height,
+        }
+    }
+}
+
 impl<T> Grid<T> {
-    pub fn same_size_with<U>(&self, value: U) -> Grid<U>
-    where
-        U: Clone,
+    pub fn same_size_with<U: Clone>(&self, value: U) -> Grid<U>
     {
         Grid {
             height: self.height,
@@ -175,8 +184,8 @@ impl<T> Grid<T> {
         }
     }
 
-    pub fn four_connected_point2d(&self, point: &Point2d) -> FourConnected {
-        FourConnected {
+    pub fn four_connected_point2d(&self, point: &Point2d) -> FourConnectedPoint2d {
+        FourConnectedPoint2d {
             x: point.x as usize,
             y: point.y as usize,
             height: self.height,

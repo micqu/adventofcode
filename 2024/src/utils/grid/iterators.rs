@@ -1,3 +1,5 @@
+use crate::utils::points::point2d::Point2d;
+
 pub const ADJ_FOUR: [(isize, isize); 4] = [(1, 0), (0, -1), (-1, 0), (0, 1)];
 pub const ADJ_DIAGONAL: [(isize, isize); 4] = [(1, -1), (-1, -1), (-1, 1), (1, 1)];
 pub const ADJ_EIGHT: [(isize, isize); 8] = [
@@ -69,6 +71,37 @@ impl Iterator for FourConnected {
             }
 
             return Some((nx as usize, ny as usize, self.current - 1));
+        }
+    }
+}
+
+pub struct FourConnectedPoint2d {
+    pub x: usize,
+    pub y: usize,
+    pub height: usize,
+    pub width: usize,
+    pub current: usize,
+}
+
+impl Iterator for FourConnectedPoint2d {
+    type Item = (Point2d, usize);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        loop {
+            if self.current > 3 {
+                return None;
+            }
+
+            let nx = self.x as isize + ADJ_FOUR[self.current].0;
+            let ny = self.y as isize + ADJ_FOUR[self.current].1;
+
+            self.current += 1;
+
+            if nx < 0 || nx >= self.width as isize || ny < 0 || ny >= self.height as isize {
+                continue;
+            }
+
+            return Some((Point2d::new(nx, ny), self.current - 1));
         }
     }
 }
