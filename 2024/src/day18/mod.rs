@@ -1,4 +1,4 @@
-use std::{collections::BinaryHeap, iter::from_fn};
+use std::{collections::{BinaryHeap, VecDeque}, iter::from_fn};
 
 use itertools::Itertools;
 use num::traits::ops::bytes;
@@ -58,22 +58,21 @@ fn solve(start: &Point2d, end: &Point2d, map: &Grid<bool>) -> Option<usize> {
     let mut costs = map.same_size_with(usize::MAX);
     costs[start] = 0;
 
-    let mut q = BinaryHeap::<State>::new();
-    q.push(State {
-        steps: 0,
-        pos: *start,
-    });
+    let mut q = VecDeque::<(usize, Point2d)>::new();
+    q.push_back((0, *start));
 
-    while let Some(u) = q.pop() {
-        if u.pos == *end {
-            return Some(u.steps);
+    while let Some((steps, pos)) = q.pop_front() {
+        if pos == *end {
+            return Some(steps);
         }
 
-        for (n, _) in map.four_connected_point2d(&u.pos) {
-            let c = u.steps + 1;
-            if !map[n] && c < costs[n] {
-                costs[n] = c;
-                q.push(State { steps: c, pos: n });
+        for (n, _) in map.four_connected_point2d(&pos) {
+            if !map[n] {
+                let c = steps + 1;
+                if c < costs[n] {
+                    costs[n] = c;
+                    q.push_back((c, n));
+                }
             }
         }
     }
@@ -137,24 +136,6 @@ fn solve2(p: &Point2d, end: &Point2d, map: &mut Grid<bool>, visited: &mut Grid<b
 
 //     None
 // }
-
-#[derive(Debug, Eq, PartialEq)]
-struct State {
-    steps: usize,
-    pos: Point2d,
-}
-
-impl PartialOrd for State {
-    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        Some(self.cmp(other))
-    }
-}
-
-impl Ord for State {
-    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        other.steps.cmp(&self.steps)
-    }
-}
 
 fn parse() -> Vec<Point2d> {
     let mut bytes = INPUT.bytes();
