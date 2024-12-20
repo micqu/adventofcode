@@ -21,8 +21,8 @@ pub fn part1() -> Option<Solution> {
         path.push(u);
         current = u;
     }
-    
-    find_cheats(2, &path, &path_map, &map, &costs).solution()
+
+    find_cheats(2, &path, &path_map, &costs).solution()
 }
 
 pub fn part2() -> Option<Solution> {
@@ -38,16 +38,12 @@ pub fn part2() -> Option<Solution> {
         current = u;
     }
 
-    find_cheats(20, &path, &path_map, &map, &costs).solution()
+    find_cheats(20, &path, &path_map, &costs).solution()
 }
 
-fn bfs(
-    start: &Point2d,
-    end: &Point2d,
-    map: &Grid<u8>,
-) -> (Grid<usize>, Grid<Option<Point2d>>) {
+fn bfs(start: &Point2d, end: &Point2d, map: &Grid<u8>) -> (Grid<isize>, Grid<Option<Point2d>>) {
     let mut prev = map.same_size_with(None);
-    let mut costs = map.same_size_with(usize::MAX);
+    let mut costs = map.same_size_with(isize::MAX);
     costs[start] = 0;
 
     let mut q = Vec::<State>::new();
@@ -78,23 +74,21 @@ fn find_cheats(
     max_cheat_len: usize,
     path: &Vec<Point2d>,
     path_map: &Grid<bool>,
-    map: &Grid<u8>,
-    costs: &Grid<usize>,
+    costs: &Grid<isize>,
 ) -> usize {
     let mut s: usize = 0;
     let max_cheat_len = max_cheat_len as isize;
     for u in path {
-        for i in 0..max_cheat_len * 2 + 1 {
-            for j in 0..max_cheat_len * 2 + 1 {
-                let len = (i - max_cheat_len).abs() + (j - max_cheat_len).abs();
+        for i in -max_cheat_len..=max_cheat_len {
+            for j in -max_cheat_len..=max_cheat_len {
+                let len = i.abs() + j.abs();
                 if len <= max_cheat_len {
-                    let n = Point2d::new(u.x + i - max_cheat_len, u.y + j - max_cheat_len);
-                    if map.contains_point2d(&n) && map[n] != b'#' && path_map[n] {
-                        if (costs[n] + len as usize) < costs[u] {
-                            if costs[u] - costs[n] - len as usize >= 100 {
-                                s += 1;
-                            }
-                        }
+                    let n = Point2d::new(u.x + i, u.y + j);
+                    if path_map.contains_point2d(&n)
+                        && path_map[n]
+                        && costs[u] - costs[n] - len >= 100
+                    {
+                        s += 1;
                     }
                 }
             }
@@ -106,7 +100,7 @@ fn find_cheats(
 #[derive(Debug, PartialEq, Eq)]
 struct State {
     pos: Point2d,
-    time: usize,
+    time: isize,
 }
 
 fn parse() -> (Point2d, Point2d, Grid<u8>) {
