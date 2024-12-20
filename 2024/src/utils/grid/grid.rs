@@ -2,7 +2,9 @@ use core::fmt;
 
 use crate::utils::points::point2d::Point2d;
 
-use super::iterators::{Diagonals, EightConnected, FourConnected, FourConnectedPoint2d, FourConnectedUnbound, Positions};
+use super::iterators::{
+    Diagonals, DiagonalsPoint2d, EightConnected, FourConnected, FourConnectedPoint2d, FourConnectedUnbound, Positions, PositionsPoint2d
+};
 
 #[derive(Debug, Clone)]
 pub struct Grid<T> {
@@ -26,8 +28,7 @@ impl Grid<u8> {
 }
 
 impl<T: Clone> Grid<T> {
-    pub fn new_with(value: T, width: usize, height: usize) -> Self
-    {
+    pub fn new_with(value: T, width: usize, height: usize) -> Self {
         Self {
             data: vec![value; width * height],
             width,
@@ -37,8 +38,7 @@ impl<T: Clone> Grid<T> {
 }
 
 impl<T> Grid<T> {
-    pub fn same_size_with<U: Clone>(&self, value: U) -> Grid<U>
-    {
+    pub fn same_size_with<U: Clone>(&self, value: U) -> Grid<U> {
         Grid {
             height: self.height,
             width: self.width,
@@ -214,10 +214,10 @@ impl<T> Grid<T> {
         }
     }
 
-    pub fn diagonals_point(&self, point: (usize, usize)) -> Diagonals {
-        Diagonals {
-            x: point.0,
-            y: point.1,
+    pub fn diagonals_point2d(&self, point: &Point2d) -> DiagonalsPoint2d {
+        DiagonalsPoint2d {
+            x: point.x,
+            y: point.y,
             height: self.height,
             width: self.width,
             current: 0,
@@ -226,8 +226,14 @@ impl<T> Grid<T> {
 
     pub fn positions(&self) -> Positions {
         Positions {
-            x: 0,
-            y: 0,
+            height: self.height,
+            width: self.width,
+            index: 0,
+        }
+    }
+
+    pub fn positions_point2d(&self) -> PositionsPoint2d {
+        PositionsPoint2d {
             height: self.height,
             width: self.width,
             index: 0,

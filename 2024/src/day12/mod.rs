@@ -1,6 +1,5 @@
 use crate::utils::{
-    grid::grid::Grid,
-    solution::{IntoSolution, Solution},
+    grid::grid::Grid, points::point2d::Point2d, solution::{IntoSolution, Solution}
 };
 
 pub const TITLE: &str = "Garden Groups";
@@ -9,10 +8,10 @@ const INPUT: &'static str = include_str!("input.txt");
 pub fn part1() -> Option<Solution> {
     let map = parse();
     let mut seen = Grid::from_vec_width(vec![false; map.data.len()], map.width);
-    map.positions()
-        .map(|(x, y)| {
-            if !seen[(x, y)] {
-                let r = fill((x, y), &map, &mut seen);
+    map.positions_point2d()
+        .map(|p| {
+            if !seen[p] {
+                let r = fill(&p, &map, &mut seen);
                 return r.0 * r.1;
             }
             0
@@ -24,10 +23,10 @@ pub fn part1() -> Option<Solution> {
 pub fn part2() -> Option<Solution> {
     let map = parse();
     let mut seen = Grid::from_vec_width(vec![false; map.data.len()], map.width);
-    map.positions()
-        .map(|(x, y)| {
-            if !seen[(x, y)] {
-                let r = fill2((x, y), &map, &mut seen);
+    map.positions_point2d()
+        .map(|p| {
+            if !seen[p] {
+                let r = fill2(&p, &map, &mut seen);
                 return r.0 * r.1;
             }
             0
@@ -36,16 +35,16 @@ pub fn part2() -> Option<Solution> {
         .solution()
 }
 
-fn fill(p: (usize, usize), map: &Grid<u8>, seen: &mut Grid<bool>) -> (usize, usize) {
+fn fill(p: &Point2d, map: &Grid<u8>, seen: &mut Grid<bool>) -> (usize, usize) {
     seen[p] = true;
     let mut perimeter = 4;
     let mut area = 1;
     let c = map[p];
-    for (nx, ny, _) in map.four_connected_point(p) {
-        if map[(nx, ny)] == c {
+    for (n, _) in map.four_connected_point2d(p) {
+        if map[n] == c {
             perimeter -= 1;
-            if !seen[(nx, ny)] {
-                let r = fill((nx, ny), map, seen);
+            if !seen[n] {
+                let r = fill(&n, map, seen);
                 perimeter += r.0;
                 area += r.1;
             }
@@ -54,17 +53,17 @@ fn fill(p: (usize, usize), map: &Grid<u8>, seen: &mut Grid<bool>) -> (usize, usi
     (perimeter, area)
 }
 
-fn fill2(p: (usize, usize), map: &Grid<u8>, seen: &mut Grid<bool>) -> (usize, usize) {
+fn fill2(p: &Point2d, map: &Grid<u8>, seen: &mut Grid<bool>) -> (usize, usize) {
     seen[p] = true;
     let mut area = 1;
     let mut corners = 0;
     let c = map[p];
     let mut ds: usize = 0b1111;
-    for (nx, ny, d) in map.four_connected_point(p) {
-        if map[(nx, ny)] == c {
+    for (n, d) in map.four_connected_point2d(p) {
+        if map[n] == c {
             ds &= !(1 << d);
-            if !seen[(nx, ny)] {
-                let r = fill2((nx, ny), map, seen);
+            if !seen[n] {
+                let r = fill2(&n, map, seen);
                 corners += r.0;
                 area += r.1;
             }
@@ -88,8 +87,8 @@ fn fill2(p: (usize, usize), map: &Grid<u8>, seen: &mut Grid<bool>) -> (usize, us
     }
 
     let mut diag: usize = 0b1111;
-    for (nx, ny, d) in map.diagonals_point(p) {
-        if map[(nx, ny)] == c {
+    for (n, d) in map.diagonals_point2d(p) {
+        if map[n] == c {
             diag &= !(1 << d);
         }
     }

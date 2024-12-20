@@ -10,84 +10,62 @@ pub const TITLE: &str = "Race Condition";
 const INPUT: &'static str = include_str!("input.txt");
 
 pub fn part1() -> Option<Solution> {
-    let (start, end, map) = parse();
-    let (costs, prev) = bfs(&start, &end, &map);
-
-    let mut path_map = map.same_size_with(false);
-    let mut path = vec![end];
-    let mut current = end;
-    while let Some(u) = prev[current] {
-        path_map[u] = true;
-        path.push(u);
-        current = u;
-    }
-
-    find_cheats(2, &path, &path_map, &costs).solution()
+    let map = Grid::parse(INPUT);
+    let start = map.find(b'S').unwrap();
+    let end = map.find(b'E').unwrap();
+    
+    let costs = dfs(&start, &end, &map);
+    find_cheats(2, &map, &costs).solution()
 }
 
 pub fn part2() -> Option<Solution> {
-    let (start, end, map) = parse();
-    let (costs, prev) = bfs(&start, &end, &map);
-
-    let mut path_map = map.same_size_with(false);
-    let mut path = vec![end];
-    let mut current = end;
-    while let Some(u) = prev[current] {
-        path_map[u] = true;
-        path.push(u);
-        current = u;
-    }
-
-    find_cheats(20, &path, &path_map, &costs).solution()
+    let map = Grid::parse(INPUT);
+    let start = map.find(b'S').unwrap();
+    let end = map.find(b'E').unwrap();
+    
+    let costs = dfs(&start, &end, &map);
+    find_cheats(20, &map, &costs).solution()
 }
 
-fn bfs(start: &Point2d, end: &Point2d, map: &Grid<u8>) -> (Grid<isize>, Grid<Option<Point2d>>) {
-    let mut prev = map.same_size_with(None);
+fn dfs(start: &Point2d, end: &Point2d, map: &Grid<u8>) -> Grid<isize> {
     let mut costs = map.same_size_with(isize::MAX);
     costs[start] = 0;
 
-    let mut q = Vec::<State>::new();
-    q.push(State {
-        pos: *start,
-        time: 0,
-    });
+    let mut q = Vec::<(Point2d, isize)>::new();
+    q.push((*start, 0));
 
     while let Some(u) = q.pop() {
-        if u.pos == *end {
+        if u.0 == *end {
             break;
         }
 
-        for (n, _) in map.four_connected_point2d(&u.pos) {
-            let c = u.time + 1;
-            if map[n] != b'#' && c < costs[n] {
-                costs[n] = c;
-                prev[n] = Some(u.pos);
-                q.push(State { pos: n, time: c });
+        for (n, _) in map.four_connected_point2d(&u.0) {
+            if map[n] != b'#' {
+                let c = u.1 + 1;
+                if c < costs[n] {
+                    costs[n] = c;
+                    q.push((n, c));
+                }
             }
         }
     }
 
-    (costs, prev)
+    costs
 }
 
-fn find_cheats(
-    max_cheat_len: usize,
-    path: &Vec<Point2d>,
-    path_map: &Grid<bool>,
-    costs: &Grid<isize>,
-) -> usize {
+fn find_cheats(max_cheat_len: isize, map: &Grid<u8>, costs: &Grid<isize>) -> usize {
     let mut s: usize = 0;
-    let max_cheat_len = max_cheat_len as isize;
-    for u in path {
+    for p in map.positions() {
+        if map[p] == b'#' {
+            continue;
+        }
+
         for i in -max_cheat_len..=max_cheat_len {
-            for j in -max_cheat_len..=max_cheat_len {
-                let len = i.abs() + j.abs();
-                if len <= max_cheat_len {
-                    let n = Point2d::new(u.x + i, u.y + j);
-                    if path_map.contains_point2d(&n)
-                        && path_map[n]
-                        && costs[u] - costs[n] - len >= 100
-                    {
+            for j in (i.abs() - max_cheat_len)..=(max_cheat_len - i.abs()) {
+                let n = Point2d::new(p.0 as isize + i, p.1 as isize + j);
+                if map.contains_point2d(&n) && map[n] != b'#' {
+                    let len = i.abs() + j.abs();
+                    if costs[p] - costs[n] - len >= 100 {
                         s += 1;
                     }
                 }
@@ -95,36 +73,6 @@ fn find_cheats(
         }
     }
     s
-}
-
-#[derive(Debug, PartialEq, Eq)]
-struct State {
-    pos: Point2d,
-    time: isize,
-}
-
-fn parse() -> (Point2d, Point2d, Grid<u8>) {
-    let mut start = Point2d::new(0, 0);
-    let mut end = Point2d::new(0, 0);
-    let mut h: usize = 0;
-    let k = INPUT
-        .lines()
-        .inspect(|x| {
-            if let Some(s) = x.find('S') {
-                start.x = s as isize;
-                start.y = h as isize;
-            } else if let Some(s) = x.find('E') {
-                end.x = s as isize;
-                end.y = h as isize;
-            }
-
-            h += 1;
-        })
-        .map(|x| x.bytes())
-        .flatten()
-        .collect();
-
-    (start, end, Grid::from_vec_height(k, h))
 }
 
 #[cfg(test)]
