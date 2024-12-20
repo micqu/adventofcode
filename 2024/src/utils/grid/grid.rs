@@ -340,6 +340,22 @@ impl std::fmt::Display for Grid<u8> {
     }
 }
 
+// impl std::fmt::Display for Grid<usize> {
+//     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+//         let mut str = String::new();
+//         for i in 0..self.height {
+//             str.push_str(" ");
+//             let row = self.row(i);
+//             for j in 0..self.width {
+//                 let byte = row[j];
+//                 str.push(byte as char);
+//             }
+//             str.push('\n');
+//         }
+//         write!(f, "{}", str)
+//     }
+// }
+
 // fn walk(p: Point2d, end: &Point2d, mut d: usize, map: &Grid<u8>) -> Option<WalkResult> {
 //     let mut turns = 0;
 //     let mut steps = 0;

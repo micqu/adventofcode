@@ -78,6 +78,10 @@ impl Point2d {
         self.x * other.y - other.x * self.y
     }
 
+    pub fn l1(&self, other: &Self) -> usize {
+        self.x.abs_diff(other.x) + self.y.abs_diff(other.y)
+    }
+
     pub fn parse<T>(iter: &mut T) -> Self
     where
         T: IntoIterator<Item = u8> + Parsable<isize>,

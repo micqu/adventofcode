@@ -1,7 +1,6 @@
 use std::collections::VecDeque;
 
 use itertools::Itertools;
-use rayon::result;
 
 use crate::utils::{
     solution::{IntoSolution, Solution},
@@ -13,11 +12,9 @@ const INPUT: &'static str = include_str!("input.txt");
 
 pub fn part1() -> Option<Solution> {
     let (patterns, designs) = parse();
-
     let mut s = 0;
     for d in designs {
-        let mut cache = vec![None; d.len()];
-        if solve(0, &d, None, &patterns, &mut cache) {
+        if solve(0, &d, None, &patterns, &mut vec![false; d.len()]) {
             s += 1;
         }
     }
@@ -27,11 +24,9 @@ pub fn part1() -> Option<Solution> {
 
 pub fn part2() -> Option<Solution> {
     let (patterns, designs) = parse();
-
     let mut s = 0;
     for d in designs {
-        let mut cache = vec![None; d.len()];
-        s += solve2(0, &d, None, &patterns, &mut cache);
+        s += solve2(0, &d, None, &patterns, &mut vec![None; d.len()]);
     }
 
     s.solution()
@@ -42,16 +37,10 @@ fn solve(
     design: &Vec<u8>,
     child_patterns: Option<&Vec<Option<Node>>>,
     patterns: &Vec<Option<Node>>,
-    cache: &mut Vec<Option<bool>>,
+    seen: &mut Vec<bool>,
 ) -> bool {
-    if i >= design.len() {
+    if i >= design.len() || (child_patterns.is_none() && seen[i]) {
         return false;
-    }
-
-    if child_patterns.is_none() {
-        if let Some(c) = cache[i] {
-            return c;
-        }
     }
 
     let mut result: bool = false;
@@ -60,16 +49,16 @@ fn solve(
             if i == design.len() - 1 {
                 result = true;
             } else {
-                result = solve(i + 1, design, None, patterns, cache)
-                    || solve(i + 1, design, Some(&n.next), patterns, cache);
+                result = solve(i + 1, design, None, patterns, seen)
+                    || solve(i + 1, design, Some(&n.next), patterns, seen);
             }
         } else {
-            result = solve(i + 1, design, Some(&n.next), patterns, cache);
+            result = solve(i + 1, design, Some(&n.next), patterns, seen);
         }
     }
 
     if child_patterns.is_none() {
-        cache[i] = Some(result);
+        seen[i] = result;
     }
 
     result
@@ -119,7 +108,7 @@ fn parse() -> (Vec<Option<Node>>, Vec<Vec<u8>>) {
 
     if let Some(line) = lines.next() {
         for pattern in line.split(", ") {
-            let mut bytes = pattern.bytes().collect();
+            let mut bytes = pattern.bytes().rev().collect();
             set(&mut bytes, &mut patterns);
         }
     }
@@ -134,8 +123,8 @@ fn parse() -> (Vec<Option<Node>>, Vec<Vec<u8>>) {
     (patterns, designs)
 }
 
-fn set(input: &mut VecDeque<u8>, patterns: &mut Vec<Option<Node>>) {
-    if let Some(u) = input.pop_front() {
+fn set(input: &mut Vec<u8>, patterns: &mut Vec<Option<Node>>) {
+    if let Some(u) = input.pop() {
         let id = map_id(u);
         if patterns[id].is_none() {
             patterns[id] = Some(Node {
