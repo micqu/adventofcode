@@ -19,7 +19,7 @@ pub fn part2() -> Option<Solution> {
     INPUT
         .lines()
         .map(|line| {
-            let numbers: Vec<i16> = line.to_numbers();
+            let numbers: Vec<i16> = line.numbers();
             for n in 0..numbers.len() {
                 let mut filtered = numbers
                     .iter()
@@ -85,19 +85,11 @@ mod tests {
 
     #[test]
     fn part1() {
-        let result = super::part1().unwrap();
-        match result {
-            Solution::Usize(a) => assert_eq!(a, 269),
-            _ => panic!(),
-        }
+        assert_eq!(super::part1(), (269 as usize).solution());
     }
 
     #[test]
     fn part2() {
-        let result = super::part2().unwrap();
-        match result {
-            Solution::Usize(a) => assert_eq!(a, 337),
-            _ => panic!(),
-        }
+        assert_eq!(super::part2(), (337 as usize).solution());
     }
 }

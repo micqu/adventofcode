@@ -102,19 +102,11 @@ mod tests {
     
     #[test]
     fn part1() {
-        let result = super::part1().unwrap();
-        match result {
-            Solution::Usize(a) => assert_eq!(a, 175015740),
-            _ => panic!(),
-        }
+        assert_eq!(super::part1(), (175015740 as usize).solution());
     }
 
     #[test]
     fn part2() {
-        let result = super::part2().unwrap();
-        match result {
-            Solution::Usize(a) => assert_eq!(a, 112272912),
-            _ => panic!(),
-        }
+        assert_eq!(super::part2(), (112272912 as usize).solution());
     }
 }

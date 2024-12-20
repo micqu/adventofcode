@@ -1,8 +1,7 @@
 use std::iter::from_fn;
 
 use crate::utils::{
-    solution::{IntoSolution, Solution},
-    Parsable,
+    solution::{IntoSolution, Solution}, NextNumbers, Parsable
 };
 
 pub const TITLE: &str = "Bridge Repair";
@@ -72,33 +71,6 @@ fn solve2(t: usize, i: usize, e: &Vec<usize>) -> bool {
     }
 }
 
-fn solve2_forward(t: usize, i: usize, d: usize, e: &Vec<usize>) -> bool {
-    if i == e.len() {
-        return d == t;
-    }
-
-    if d > t {
-        return false;
-    }
-
-    solve2_forward(t, i + 1, concat(d, e[i]), e)
-        || solve2_forward(t, i + 1, d * e[i], e)
-        || solve2_forward(t, i + 1, d + e[i], e)
-}
-
-fn concat(a: usize, b: usize) -> usize {
-    a * 10usize.pow(length(b)) + b
-}
-
-fn length(mut a: usize) -> u32 {
-    let mut i = 1;
-    while a >= 10 {
-        a /= 10;
-        i += 1;
-    }
-    i
-}
-
 fn split(mut lhs: usize, mut rhs: usize) -> Option<usize> {
     while rhs > 0 {
         if lhs % 10 != rhs % 10 {
@@ -110,6 +82,33 @@ fn split(mut lhs: usize, mut rhs: usize) -> Option<usize> {
     Some(lhs)
 }
 
+// fn solve2_forward(t: usize, i: usize, d: usize, e: &Vec<usize>) -> bool {
+//     if i == e.len() {
+//         return d == t;
+//     }
+
+//     if d > t {
+//         return false;
+//     }
+
+//     solve2_forward(t, i + 1, concat(d, e[i]), e)
+//         || solve2_forward(t, i + 1, d * e[i], e)
+//         || solve2_forward(t, i + 1, d + e[i], e)
+// }
+
+// fn concat(a: usize, b: usize) -> usize {
+//     a * 10usize.pow(length(b)) + b
+// }
+
+// fn length(mut a: usize) -> u32 {
+//     let mut i = 1;
+//     while a >= 10 {
+//         a /= 10;
+//         i += 1;
+//     }
+//     i
+// }
+
 fn parse() -> Vec<Equation> {
     INPUT
         .lines()
@@ -117,7 +116,7 @@ fn parse() -> Vec<Equation> {
             let mut numbers = line.bytes();
             Equation {
                 test: numbers.next_number().unwrap(),
-                numbers: from_fn(|| numbers.next_number()).collect(),
+                numbers: numbers.next_numbers()
             }
         })
         .collect()
@@ -135,19 +134,11 @@ mod tests {
 
     #[test]
     fn part1() {
-        let result = super::part1().unwrap();
-        match result {
-            Solution::Usize(a) => assert_eq!(a, 663613490587),
-            _ => panic!(),
-        }
+        assert_eq!(super::part1(), (663613490587 as usize).solution());
     }
 
     #[test]
     fn part2() {
-        let result = super::part2().unwrap();
-        match result {
-            Solution::Usize(a) => assert_eq!(a, 110365987435001),
-            _ => panic!(),
-        }
+        assert_eq!(super::part2(), (110365987435001 as usize).solution());
     }
 }

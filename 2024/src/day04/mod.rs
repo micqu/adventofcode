@@ -101,19 +101,11 @@ mod tests {
 
     #[test]
     fn part1() {
-        let result = super::part1().unwrap();
-        match result {
-            Solution::I32(a) => assert_eq!(a, 2646),
-            _ => panic!(),
-        }
+        assert_eq!(super::part1(), (2646 as i32).solution());
     }
 
     #[test]
     fn part2() {
-        let result = super::part2().unwrap();
-        match result {
-            Solution::I32(a) => assert_eq!(a, 2000),
-            _ => panic!(),
-        }
+        assert_eq!(super::part2(), (2000 as i32).solution());
     }
 }

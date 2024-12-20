@@ -69,7 +69,7 @@ fn parse() -> (Vec<Vec<usize>>, Vec<Vec<usize>>) {
     }
 
     while let Some(line) = lines.next() {
-        updates.push(line.to_numbers());
+        updates.push(line.numbers());
     }
 
     (map, updates)

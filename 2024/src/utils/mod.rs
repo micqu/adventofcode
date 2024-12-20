@@ -206,20 +206,16 @@ parsable_float_number!(f32);
 parsable_float_number!(f64);
 
 pub trait ToNumbers<T> {
-    fn to_numbers(&self) -> Vec<T>;
+    fn numbers(&self) -> Vec<T>;
 }
 
 macro_rules! to_numbers {
     ($type:ident) => {
         impl ToNumbers<$type> for &str
         {
-            fn to_numbers(&self) -> Vec<$type> {
-                let mut v = self.bytes();
-                let mut ns = Vec::new();
-                while let Some(n) = Parsable::<$type>::next_number(&mut v) {
-                    ns.push(n);
-                }
-                ns
+            fn numbers(&self) -> Vec<$type> {
+                let mut bytes = self.bytes();
+                std::iter::from_fn(|| bytes.next_number()).collect()
             }
         }
     };
@@ -228,6 +224,25 @@ macro_rules! to_numbers {
 to_numbers!(i16);
 to_numbers!(isize);
 to_numbers!(usize);
+
+pub trait NextNumbers<T>: Iterator {
+    fn next_numbers(&mut self) -> Vec<T>;
+}
+
+macro_rules! next_numbers {
+    ($type:ident) => {
+        impl<T: Iterator<Item = u8>> NextNumbers<$type> for T
+        {
+            fn next_numbers(&mut self) -> Vec<$type> {
+                std::iter::from_fn(|| self.next_number()).collect()
+            }
+        }
+    };
+}
+
+next_numbers!(i16);
+next_numbers!(isize);
+next_numbers!(usize);
 
 pub trait Transposable<T> {
     fn transpose(self) -> Vec<Vec<T>>;

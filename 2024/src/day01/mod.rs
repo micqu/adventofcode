@@ -40,19 +40,11 @@ mod tests {
     
     #[test]
     fn part1() {
-        let result = super::part1().unwrap();
-        match result {
-            Solution::U32(a) => assert_eq!(a, 2196996),
-            _ => panic!(),
-        }
+        assert_eq!(super::part1(), (2196996 as u32).solution());
     }
 
     #[test]
     fn part2() {
-        let result = super::part2().unwrap();
-        match result {
-            Solution::U32(a) => assert_eq!(a, 23655822),
-            _ => panic!(),
-        }
+        assert_eq!(super::part2(), (23655822 as u32).solution());
     }
 }
