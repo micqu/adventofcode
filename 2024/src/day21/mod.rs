@@ -12,6 +12,8 @@ use crate::utils::{
 pub const TITLE: &str = "Keypad Conundrum";
 const INPUT: &'static str = include_str!("input.txt");
 
+type Cache = HashMap<(Point2d, Point2d, Point2d, usize), usize>;
+
 pub fn part1() -> Option<Solution> {
     let mut codes = parse();
 
@@ -100,16 +102,10 @@ pub fn part2() -> Option<Solution> {
     s.solution()
 }
 
-fn numeric(
-    a: &Point2d,
-    b: &Point2d,
-    prev: &Point2d,
-    l: usize,
-    cache: &mut HashMap<(Point2d, Point2d, Point2d, usize), usize>,
-) -> usize {
+fn numeric(a: &Point2d, b: &Point2d, prev: &Point2d, l: usize, cache: &mut Cache) -> usize {
     let start = Point2d::new(0, 0);
     if *a == *b {
-        return directional_cached(prev, &start, &start, l, cache);
+        return dir_cached(prev, &start, &start, l, cache);
     }
 
     let mut cost = usize::MAX;
@@ -121,9 +117,7 @@ fn numeric(
         let c = if d.x == 1 { right } else { left };
         let n = Point2d::new(a.x + d.x, a.y);
         if n != empty {
-            cost = cost.min(
-                directional_cached(&prev, &c, &start, l, cache) + numeric(&n, b, &c, l, cache),
-            );
+            cost = cost.min(dir_cached(&prev, &c, &start, l, cache) + numeric(&n, b, &c, l, cache));
         }
     }
 
@@ -134,46 +128,32 @@ fn numeric(
         let c = if d.y == 1 { down } else { up };
         let n = Point2d::new(a.x, a.y + d.y);
         if n != empty {
-            cost = cost.min(
-                directional_cached(&prev, &c, &start, l, cache) + numeric(&n, b, &c, l, cache),
-            );
+            cost = cost.min(dir_cached(&prev, &c, &start, l, cache) + numeric(&n, b, &c, l, cache));
         }
     }
 
     cost
 }
 
-fn directional_cached(
-    a: &Point2d,
-    b: &Point2d,
-    prev: &Point2d,
-    l: usize,
-    cache: &mut HashMap<(Point2d, Point2d, Point2d, usize), usize>,
-) -> usize {
+fn dir_cached(a: &Point2d, b: &Point2d, prev: &Point2d, l: usize, cache: &mut Cache) -> usize {
     let key = (*a, *b, *prev, l);
     if cache.contains_key(&key) {
         return cache[&key];
     }
 
-    let r = directional(a, b, prev, l, cache);
+    let r = dir(a, b, prev, l, cache);
     cache.insert(key, r);
     r
 }
 
-fn directional(
-    a: &Point2d,
-    b: &Point2d,
-    prev: &Point2d,
-    l: usize,
-    cache: &mut HashMap<(Point2d, Point2d, Point2d, usize), usize>,
-) -> usize {
+fn dir(a: &Point2d, b: &Point2d, prev: &Point2d, l: usize, cache: &mut Cache) -> usize {
     if l == 0 {
         return 1;
     }
 
     let start = Point2d::new(0, 0);
     if *a == *b {
-        return directional_cached(prev, &start, &start, l - 1, cache);
+        return dir_cached(prev, &start, &start, l - 1, cache);
     }
 
     let mut cost = usize::MAX;
@@ -185,10 +165,8 @@ fn directional(
         let c = if d.x == 1 { right } else { left };
         let n = Point2d::new(a.x + d.x, a.y);
         if n != empty {
-            cost = cost.min(
-                directional_cached(&prev, &c, &start, l - 1, cache)
-                    + directional_cached(&n, b, &c, l, cache),
-            );
+            cost = cost
+                .min(dir_cached(&prev, &c, &start, l - 1, cache) + dir_cached(&n, b, &c, l, cache));
         }
     }
 
@@ -199,10 +177,8 @@ fn directional(
         let c = if d.y == 1 { down } else { up };
         let n = Point2d::new(a.x, a.y + d.y);
         if n != empty {
-            cost = cost.min(
-                directional_cached(&prev, &c, &start, l - 1, cache)
-                    + directional_cached(&n, b, &c, l, cache),
-            );
+            cost = cost
+                .min(dir_cached(&prev, &c, &start, l - 1, cache) + dir_cached(&n, b, &c, l, cache));
         }
     }
 

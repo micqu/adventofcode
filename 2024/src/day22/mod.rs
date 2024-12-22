@@ -60,12 +60,12 @@ pub fn part2() -> Option<Solution> {
 }
 
 fn evolve(secret: &mut isize) {
-    *secret ^= *secret * 64;
-    *secret %= 16777216;
-    *secret ^= *secret / 32;
-    *secret %= 16777216;
-    *secret ^= *secret * 2048;
-    *secret %= 16777216;
+    *secret ^= *secret << 6;
+    *secret &= 0xFFFFFF;
+    *secret ^= *secret >> 5;
+    *secret &= 0xFFFFFF;
+    *secret ^= *secret << 11;
+    *secret &= 0xFFFFFF;
 }
 
 #[cfg(test)]
