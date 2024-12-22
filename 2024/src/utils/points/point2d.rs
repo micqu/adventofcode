@@ -1,6 +1,6 @@
 use crate::utils::{grid::iterators::ADJ_FOUR, Parsable};
 
-#[derive(Debug, Eq, PartialEq, Clone, Copy, PartialOrd, Ord)]
+#[derive(Debug, Eq, PartialEq, Clone, Copy, PartialOrd, Ord, Hash)]
 pub struct Point2d {
     pub x: isize,
     pub y: isize,
@@ -78,8 +78,15 @@ impl Point2d {
         self.x * other.y - other.x * self.y
     }
 
-    pub fn l1(&self, other: &Self) -> usize {
-        self.x.abs_diff(other.x) + self.y.abs_diff(other.y)
+    pub fn l1(&self) -> usize {
+        self.x.abs() as usize + self.y.abs() as usize
+    }
+
+    pub fn signum(&self) -> Self {
+        Self {
+            x: self.x.signum(),
+            y: self.y.signum(),
+        }
     }
 
     pub fn parse<T>(iter: &mut T) -> Self
