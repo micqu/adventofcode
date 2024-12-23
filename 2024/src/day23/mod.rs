@@ -35,30 +35,14 @@ pub fn part1() -> Option<Solution> {
 pub fn part2() -> Option<Solution> {
     let (neighbours, adj) = parse();
 
-    let mut max_clique = Vec::new();
-    let mut clique = Vec::<usize>::new();
-    let mut seen = vec![false; 26 * 26];
-    for (node, ns) in neighbours {
-        if seen[node] {
-            continue;
-        }
+    let r = Vec::new();
+    let p = neighbours.keys().map(|x| *x).collect_vec();
+    let x = Vec::new();
 
-        seen[node] = true;
-        clique.push(node);
-
-        for n in ns {
-            if clique.iter().all(|x| adj[*x][n]) {
-                clique.push(n);
-                seen[n] = true;
-            }
-        }
-
-        if clique.len() > max_clique.len() {
-            max_clique = clique.clone();
-        }
-
-        clique.clear();
-    }
+    let max_clique = find_cliques(r, p, x, &neighbours, &adj)
+        .into_iter()
+        .max_by_key(Vec::len)
+        .unwrap();
 
     let mut s = Vec::new();
     for id in max_clique {
@@ -70,6 +54,60 @@ pub fn part2() -> Option<Solution> {
     }
 
     s.iter().sorted_unstable().join(",").solution()
+
+    // let mut max_clique = Vec::new();
+    // let mut clique = Vec::<usize>::new();
+    // let mut seen = vec![false; 26 * 26];
+    // for (node, ns) in neighbours {
+    //     if seen[node] {
+    //         continue;
+    //     }
+
+    //     seen[node] = true;
+    //     clique.push(node);
+
+    //     for n in ns {
+    //         if clique.iter().all(|x| adj[*x][n]) {
+    //             clique.push(n);
+    //             seen[n] = true;
+    //         }
+    //     }
+
+    //     if clique.len() > max_clique.len() {
+    //         max_clique = clique.clone();
+    //     }
+
+    //     clique.clear();
+    // }
+}
+
+// Bron–Kerbosch
+fn find_cliques(
+    r: Vec<usize>,
+    mut p: Vec<usize>,
+    mut x: Vec<usize>,
+    neighbours: &HashMap<usize, Vec<usize>>,
+    map: &Vec<Vec<bool>>,
+) -> Vec<Vec<usize>> {
+    if p.len() == 0 && x.len() == 0 {
+        return vec![r; 1];
+    }
+
+    let mut output = Vec::new();
+    while let Some(v) = p.pop() {
+        if let Some(n) = neighbours.get(&v) {
+            let pn = p.iter().filter(|x| n.contains(x)).map(|x| *x).collect();
+            let xn = x.iter().filter(|x| n.contains(x)).map(|x| *x).collect();
+            let mut rn = r.clone();
+            rn.push(v);
+            
+            let new_cliques = find_cliques(rn, pn, xn, neighbours, map);
+            output.extend(new_cliques);
+            x.push(v);
+        }
+    }
+
+    output
 }
 
 fn parse() -> (HashMap<usize, Vec<usize>>, Vec<Vec<bool>>) {
