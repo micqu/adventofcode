@@ -9,7 +9,25 @@ pub const TITLE: &str = "Gift Shop";
 const INPUT: &'static str = include_str!("input.txt");
 
 pub fn part1() -> Option<Solution> {
-    None
+    let mut ids = 0;
+    let ranges = parse();
+
+    for Range { from, to } in ranges {
+        for n in from..=to {
+            let len = length(n);
+
+            if len % 2 == 0 {
+                let i = len / 2;
+                let o = 10_u32.pow(i - 1);
+                let k = mirror(o, i, 2);
+                if n % (k / o) as usize == 0 {
+                    ids += n;
+                }
+            }
+        }
+    }
+
+    ids.solution()
 }
 
 pub fn part2() -> Option<Solution> {
@@ -42,8 +60,9 @@ fn length(a: usize) -> u32 {
 
 fn mirror(a: u32, len: u32, n: u32) -> u32 {
     let mut r = 0;
+    let m = 10_u32.pow(len);
     for _ in 0..n {
-        r = r * 10_u32.pow(len) + a;
+        r = r * m + a;
     }
     r
 }
