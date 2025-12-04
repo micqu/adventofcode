@@ -22,7 +22,7 @@ pub fn part1() -> Option<Solution> {
                 let o = 10_usize.pow(len / 2 - 1);
                 let k = o * 10 + 1;
 
-                for j in o..o * 10 {
+                for j in (from / k).max(o)..o * 10 {
                     let n = k * j;
 
                     if n > to {
@@ -51,9 +51,10 @@ pub fn part2() -> Option<Solution> {
             for i in 1..=len / 2 {
                 if len % i == 0 {
                     let o = 10_usize.pow(i - 1);
-                    let k = mirror(o, i, len / i) / o;
+                    let m = o * 10;
+                    let k = mirror(o, m, len / i) / o;
 
-                    for j in o..o * 10 {
+                    for j in (from / k).max(o)..m {
                         let n = k * j;
 
                         if n > to {
@@ -76,11 +77,10 @@ fn length(a: usize) -> u32 {
     a.checked_ilog10().unwrap_or(0) + 1
 }
 
-fn mirror(a: usize, len: u32, n: u32) -> usize {
+fn mirror(a: usize, len: usize, n: u32) -> usize {
     let mut r = a;
-    let m = 10_usize.pow(len);
     for _ in 1..n {
-        r = r * m + a;
+        r = r * len + a;
     }
     r
 }
