@@ -1,3 +1,5 @@
+use std::collections::{BinaryHeap, VecDeque};
+
 use itertools::Itertools;
 
 use crate::utils::{
@@ -13,21 +15,13 @@ pub fn part1() -> Option<Solution> {
     let map = parse();
     let mut s: usize = 0;
 
-    for i in 0..map.width {
-        for j in 0..map.height {
-            if map[(i, j)] != b'@' {
-                continue;
-            }
+    for u in map.positions() {
+        if map[u] != b'@' {
+            continue;
+        }
 
-            if map
-                .eight_connected_point((i, j))
-                .map(|x| map[x] == b'@')
-                .filter(|x| *x)
-                .count()
-                < 4
-            {
-                s += 1;
-            }
+        if count_paper(u, &map) < 4 {
+            s += 1;
         }
     }
 
@@ -37,33 +31,48 @@ pub fn part1() -> Option<Solution> {
 pub fn part2() -> Option<Solution> {
     let mut map = parse();
     let mut s: usize = 0;
-    let mut d = true;
+    let mut q = VecDeque::<(usize, usize)>::new();
 
-    while d {
-        d = false;
+    for u in map.positions() {
+        if map[u] != b'@' {
+            continue;
+        }
 
-        for i in 0..map.width {
-            for j in 0..map.height {
-                if map[(i, j)] != b'@' {
-                    continue;
-                }
-
-                if map
-                    .eight_connected_point((i, j))
-                    .map(|x| map[x] == b'@')
-                    .filter(|x| *x)
-                    .count()
-                    < 4
-                {
-                    s += 1;
-                    map[(i, j)] = b'.';
-                    d = true;
-                }
-            }
+        if count_paper(u, &map) < 4 {
+            s += clear(u, &mut q, &mut map);
         }
     }
 
     s.solution()
+}
+
+fn clear(u: (usize, usize), q: &mut VecDeque<(usize, usize)>, map: &mut Grid<u8>) -> usize {
+    q.push_back(u);
+
+    let mut s = 0;
+    while let Some(u) = q.pop_front() {
+        if map[u] != b'@' || count_paper(u, map) >= 4 {
+            continue;
+        }
+
+        map[u] = 0;
+        s += 1;
+
+        for n in map.eight_connected_point(u) {
+            if map[n] == b'@' {
+                q.push_back(n);
+            }
+        }
+    }
+
+    s
+}
+
+fn count_paper(u: (usize, usize), map: &Grid<u8>) -> usize {
+    map.eight_connected_point(u)
+        .map(|x| map[x] == b'@')
+        .filter(|x| *x)
+        .count()
 }
 
 fn parse() -> Grid<u8> {
