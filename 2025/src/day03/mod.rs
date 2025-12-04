@@ -29,20 +29,19 @@ fn solve(bytes: &[u8], pos: usize, rem: usize) -> Option<usize> {
         return None;
     }
 
-    let mut max = 0;
-    let mut next = 0;
+    let mut max = bytes[pos];
+    let mut idx = pos;
 
-    for i in pos..bytes.len() - rem + 1 {
+    for i in pos + 1..bytes.len() - rem + 1 {
         let a = bytes[i];
         if a > max {
             max = a;
-            next = i;
+            idx = i;
         }
     }
 
-    if let Some(s) = solve(bytes, next + 1, rem - 1) {
-        let l = s.checked_ilog10().unwrap_or(0) + 1;
-        Some((max - b'0') as usize * 10_usize.pow(l) + s)
+    if let Some(s) = solve(bytes, idx + 1, rem - 1) {
+        Some((max - b'0') as usize * 10_usize.pow(rem as u32 - 1) + s)
     } else {
         Some((max - b'0') as usize)
     }
