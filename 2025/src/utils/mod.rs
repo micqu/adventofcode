@@ -29,10 +29,10 @@ macro_rules! parse_positive_number {
                     return value;
                 }
             }
-        
+
             value
         }
-    }
+    };
 }
 
 parse_positive_number!(parse_u32, u32);
@@ -63,7 +63,7 @@ parse_positive_number!(parse_u128, u128);
 //                     return value;
 //                 }
 //             }
-        
+
 //             if negative {
 //                 if let Some(current) = value {
 //                     return Some(-current);
@@ -121,6 +121,24 @@ parsable_number!(u32);
 parsable_number!(u64);
 parsable_number!(u128);
 parsable_number!(usize);
+
+pub trait ParsableNonWhitespaceByte<T>: Iterator {
+    fn next_non_whitespace_byte(&mut self) -> Option<T>;
+}
+
+impl<T: Iterator<Item = u8>> ParsableNonWhitespaceByte<u8> for T {
+    fn next_non_whitespace_byte(&mut self) -> Option<u8> {
+        for byte in self {
+            if byte.is_ascii_whitespace() {
+                continue;
+            }
+
+            return Some(byte);
+        }
+
+        None
+    }
+}
 
 macro_rules! parsable_negative_number {
     ($type:ident) => {
@@ -211,8 +229,7 @@ pub trait ToNumbers<T> {
 
 macro_rules! to_numbers {
     ($type:ident) => {
-        impl ToNumbers<$type> for &str
-        {
+        impl ToNumbers<$type> for &str {
             fn numbers(&self) -> Vec<$type> {
                 let mut bytes = self.bytes();
                 std::iter::from_fn(|| bytes.next_number()).collect()
@@ -231,8 +248,7 @@ pub trait NextNumbers<T>: Iterator {
 
 macro_rules! next_numbers {
     ($type:ident) => {
-        impl<T: Iterator<Item = u8>> NextNumbers<$type> for T
-        {
+        impl<T: Iterator<Item = u8>> NextNumbers<$type> for T {
             fn next_numbers(&mut self) -> Vec<$type> {
                 std::iter::from_fn(|| self.next_number()).collect()
             }
