@@ -3,7 +3,8 @@ use core::fmt;
 use crate::utils::points::point2d::Point2d;
 
 use super::iterators::{
-    Diagonals, DiagonalsPoint2d, EightConnected, FourConnected, FourConnectedPoint2d, FourConnectedUnbound, Positions, PositionsPoint2d
+    Diagonals, DiagonalsPoint2d, EightConnected, FourConnected, FourConnectedPoint2d,
+    FourConnectedUnbound, Positions, PositionsPoint2d,
 };
 
 #[derive(Debug, Clone)]
