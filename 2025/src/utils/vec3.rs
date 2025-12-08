@@ -4,6 +4,7 @@ use std::{
 };
 
 use forward_ref::{forward_ref_binop, forward_ref_op_assign};
+use num::Float;
 
 use super::Parsable;
 
@@ -32,9 +33,10 @@ impl Vec3 {
     }
 
     pub fn l2(&self, other: &Self) -> f64 {
-        (self.x - other.x) * (self.x - other.x)
+        ((self.x - other.x) * (self.x - other.x)
             + (self.y - other.y) * (self.y - other.y)
-            + (self.z - other.z) * (self.z - other.z)
+            + (self.z - other.z) * (self.z - other.z))
+            .sqrt()
     }
 
     pub fn sum(&self) -> f64 {
