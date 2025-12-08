@@ -1,4 +1,7 @@
-use std::{iter::Sum, ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign}};
+use std::{
+    iter::Sum,
+    ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign},
+};
 
 use forward_ref::{forward_ref_binop, forward_ref_op_assign};
 
@@ -28,6 +31,16 @@ impl Vec3 {
         }
     }
 
+    pub fn l2(&self, other: &Self) -> f64 {
+        (self.x - other.x) * (self.x - other.x)
+            + (self.y - other.y) * (self.y - other.y)
+            + (self.z - other.z) * (self.z - other.z)
+    }
+
+    pub fn sum(&self) -> f64 {
+        self.x + self.y + self.z
+    }
+
     pub fn parse<T>(iter: &mut T) -> Self
     where
         T: IntoIterator<Item = u8> + Parsable<f64>,
@@ -39,7 +52,6 @@ impl Vec3 {
         }
     }
 }
-
 
 impl Add for Vec3 {
     type Output = Self;
@@ -116,7 +128,6 @@ impl Sub<f64> for Vec3 {
 
 forward_ref_binop!(impl Sub, sub for Vec3, f64);
 
-
 impl AddAssign for Vec3 {
     #[inline]
     fn add_assign(&mut self, rhs: Self) {
@@ -150,7 +161,6 @@ impl MulAssign for Vec3 {
 
 forward_ref_op_assign!(impl MulAssign, mul_assign for Vec3, Vec3);
 
-
 impl DivAssign for Vec3 {
     #[inline]
     fn div_assign(&mut self, rhs: Self) {
@@ -171,5 +181,17 @@ impl Sum for Vec3 {
             z += p.z;
         }
         Vec3::new(x, y, z)
+    }
+}
+
+impl Mul for Vec3 {
+    type Output = Self;
+
+    fn mul(self, rhs: Self) -> Self::Output {
+        Vec3 {
+            x: self.x * rhs.x,
+            y: self.y * rhs.y,
+            z: self.z * rhs.z,
+        }
     }
 }
