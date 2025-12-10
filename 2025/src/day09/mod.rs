@@ -36,39 +36,31 @@ pub fn part2() -> Option<Solution> {
 
     let mut edges = Vec::new();
     let mut dx = Vec::new();
-    let mut dy = Vec::new();
 
     for (a, b) in v.iter().cycle().take(v.len() + 1).tuple_windows() {
         let d = b - a;
         if d.x != 0 {
             dx.push((a, b, d.x > 0));
-        } else {
-            dy.push((a, b, d.y < 0));
         }
 
         edges.push((a, b));
     }
 
     dx.sort_unstable_by_key(|a| a.0.y);
-    dy.sort_unstable_by_key(|a| a.0.x);
 
     let sizes = v
         .iter()
-        .enumerate()
         .cycle()
         .take(v.len() + 1)
         .tuple_combinations()
-        .map(|((i, a), (j, b))| {
+        .map(|(a, b)| {
             let d = b - a;
-            ((d.x.abs() + 1) * (d.y.abs() + 1), i, j)
+            ((d.x.abs() + 1) * (d.y.abs() + 1), a, b)
         })
         .sorted_unstable_by(|a, b| b.0.cmp(&a.0))
         .collect_vec();
 
-    for (area, i, j) in sizes {
-        let a = v[i];
-        let b = v[j];
-
+    for (area, a, b) in sizes {
         if a.x == b.x || a.y == b.y {
             continue;
         }
@@ -76,23 +68,23 @@ pub fn part2() -> Option<Solution> {
         let d = b - a;
         let mut ok = true;
 
+        let (x_min, x_max) = (a.x.min(b.x) + 1, a.x.max(b.x) - 1);
+        let (y_min, y_max) = (a.y.min(b.y) + 1, a.y.max(b.y) - 1);
+
+        let inner = [
+            (&Point2d::new(x_min, y_min), &Point2d::new(x_max, y_min)),
+            (&Point2d::new(x_min, y_min), &Point2d::new(x_min, y_max)),
+            (&Point2d::new(x_max, y_min), &Point2d::new(x_max, y_max)),
+            (&Point2d::new(x_min, y_max), &Point2d::new(x_max, y_max)),
+        ];
+
+        let mid = Point2d::new((x_min + x_max) / 2, (y_min + y_max) / 2);
+
         for n in [Point2d::new(a.x + d.x, a.y), Point2d::new(a.x, a.y + d.y)] {
-            if !inside(&n, &dx, &dy) {
+            if !inside(&n, &dx) {
                 ok = false;
                 break;
             }
-
-            let (x_min, x_max) = (a.x.min(b.x) + 1, a.x.max(b.x) - 1);
-            let (y_min, y_max) = (a.y.min(b.y) + 1, a.y.max(b.y) - 1);
-
-            let inner = [
-                (&Point2d::new(x_min, y_min), &Point2d::new(x_max, y_min)),
-                (&Point2d::new(x_min, y_min), &Point2d::new(x_min, y_max)),
-                (&Point2d::new(x_max, y_min), &Point2d::new(x_max, y_max)),
-                (&Point2d::new(x_min, y_max), &Point2d::new(x_max, y_max)),
-            ];
-
-            let mid = Point2d::new((x_min + x_max) / 2, (y_min + y_max) / 2);
 
             for &(e1, e2) in &edges {
                 for l in inner {
@@ -102,7 +94,7 @@ pub fn part2() -> Option<Solution> {
                     }
                 }
 
-                if !inside(&mid, &dx, &dy) {
+                if !inside(&mid, &dx) {
                     ok = false;
                     break;
                 }
@@ -125,13 +117,7 @@ pub fn part2() -> Option<Solution> {
     None
 }
 
-fn inside(
-    p: &Point2d,
-    dx: &Vec<(&Point2d, &Point2d, bool)>,
-    dy: &Vec<(&Point2d, &Point2d, bool)>,
-) -> bool {
-    let (mut c1, mut c2) = (false, false);
-
+fn inside(p: &Point2d, dx: &Vec<(&Point2d, &Point2d, bool)>) -> bool {
     for (a, b, d) in dx {
         if a.y > p.y {
             break;
@@ -146,45 +132,11 @@ fn inside(
                 return true;
             }
 
-            if *d {
-                if !c1 {
-                    c1 = true;
-                }
-            } else {
-                if c1 {
-                    c1 = false;
-                }
-            }
+            return *d;
         }
     }
 
-    for (a, b, d) in dy {
-        if a.x > p.x {
-            break;
-        }
-
-        if (p == *a) || (p == *b) {
-            return true;
-        }
-
-        if a.y.min(b.y) <= p.y && p.y <= a.y.max(b.y) {
-            if p.x == a.x {
-                return true;
-            }
-
-            if *d {
-                if !c2 {
-                    c2 = true;
-                }
-            } else {
-                if c2 {
-                    c2 = false;
-                }
-            }
-        }
-    }
-
-    c1 || c2
+    false
 }
 
 fn line_segment_intersects(a: (&Point2d, &Point2d), b: (&Point2d, &Point2d)) -> bool {
@@ -206,11 +158,11 @@ mod tests {
 
     #[test]
     fn part1() {
-        assert_eq!(super::part1(), (4741451444 as usize).solution());
+        assert_eq!(super::part1(), (4741451444 as isize).solution());
     }
 
     #[test]
     fn part2() {
-        assert_eq!(super::part2(), (1562459680 as u32).solution());
+        assert_eq!(super::part2(), (1562459680 as isize).solution());
     }
 }
