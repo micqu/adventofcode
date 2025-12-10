@@ -1,4 +1,4 @@
-use crate::utils::{grid::iterators::ADJ_FOUR, Parsable};
+use crate::utils::{Parsable, grid::iterators::ADJ_FOUR};
 
 #[derive(Debug, Eq, PartialEq, Clone, Copy, PartialOrd, Ord, Hash)]
 pub struct Point2d {
@@ -72,6 +72,10 @@ impl Point2d {
             x: self.x + d.0,
             y: self.y + d.1,
         }
+    }
+
+    pub fn sum(&self) -> isize {
+        self.x + self.y
     }
 
     pub fn determinant(&self, other: &Self) -> isize {

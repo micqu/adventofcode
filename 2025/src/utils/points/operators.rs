@@ -1,4 +1,7 @@
-use std::{iter::Sum, ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign}};
+use std::{
+    iter::Sum,
+    ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign},
+};
 
 use forward_ref::{forward_ref_binop, forward_ref_op_assign};
 
@@ -74,7 +77,6 @@ impl Sub<isize> for Point2d {
 
 forward_ref_binop!(impl Sub, sub for Point2d, isize);
 
-
 impl AddAssign for Point2d {
     #[inline]
     fn add_assign(&mut self, rhs: Self) {
@@ -105,7 +107,6 @@ impl MulAssign for Point2d {
 
 forward_ref_op_assign!(impl MulAssign, mul_assign for Point2d, Point2d);
 
-
 impl DivAssign for Point2d {
     #[inline]
     fn div_assign(&mut self, rhs: Self) {
@@ -135,3 +136,14 @@ impl Sum for Point2d {
 // }
 
 // forward_ref_op_assign!(impl AddAssign, add_assign for Point2d, (isize, isize));
+
+impl Mul for Point2d {
+    type Output = Self;
+
+    fn mul(self, rhs: Self) -> Self::Output {
+        Point2d {
+            x: self.x * rhs.x,
+            y: self.y * rhs.y,
+        }
+    }
+}
