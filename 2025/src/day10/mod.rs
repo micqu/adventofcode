@@ -1,24 +1,18 @@
-use std::{
-    cmp::Reverse,
-    collections::{BinaryHeap, HashMap, HashSet, VecDeque},
-    hash::{DefaultHasher, Hasher},
-    iter::from_fn,
-    mem::take,
-};
-
-use itertools::Itertools;
-
 use crate::utils::{
-    NextNumbers, Parsable, ParsableNonWhitespaceByte,
+    Parsable,
     solution::{IntoSolution, Solution},
 };
+use fxhash::FxHashMap as HashMap;
+use fxhash::FxHashSet as HashSet;
+use itertools::Itertools;
+use std::{collections::VecDeque, iter::from_fn};
 
 pub const TITLE: &str = "Factory";
 const INPUT: &'static str = include_str!("input.txt");
 
 pub fn part1() -> Option<Solution> {
     let mut q = VecDeque::<State>::new();
-    let mut seen = HashSet::<u16>::new();
+    let mut seen = HashSet::<u16>::default();
     let mut s = 0;
 
     for (state, buttons) in parse() {
@@ -61,7 +55,7 @@ pub fn part2() -> Option<Solution> {
                 })
                 .collect_vec();
 
-            solve2(*joltages, &combinations, &mut HashMap::new())
+            solve2(*joltages, &combinations, &mut HashMap::default())
         })
         .sum::<usize>()
         .solution()

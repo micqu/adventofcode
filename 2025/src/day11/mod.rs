@@ -1,14 +1,6 @@
-use std::{
-    collections::{HashMap, VecDeque},
-    time::Instant,
-};
-
-use itertools::Itertools;
-
-use crate::utils::{
-    Parsable,
-    solution::{IntoSolution, Solution},
-};
+use crate::utils::solution::{IntoSolution, Solution};
+use fxhash::FxHashMap as HashMap;
+use fxhash::FxHashSet as HashSet;
 
 pub const TITLE: &str = "Reactor";
 const INPUT: &'static str = include_str!("input.txt");
@@ -65,7 +57,7 @@ fn dfs(start: Device, end: Device, g: &Vec<Vec<Device>>, cache: &mut Vec<Option<
 
 fn parse() -> (Vec<Vec<Device>>, HashMap<Device, Device>) {
     let mut g: Vec<Vec<Device>> = Vec::new();
-    let mut conv = HashMap::new();
+    let mut conv = HashMap::default();
     let mut count: u16 = 0;
 
     for line in INPUT.lines() {
