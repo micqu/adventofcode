@@ -46,14 +46,17 @@ pub fn part2() -> Option<Solution> {
     parse2()
         .iter()
         .filter_map(|(buttons, joltages)| {
-            let combinations = (0..=buttons.len())
+            let mut combinations = HashMap::default();
+
+            for (sum, presses) in (0..=buttons.len())
                 .flat_map(|k| buttons.iter().combinations(k))
-                .map(|q| {
-                    let sum = q.iter().map(|x| **x).sum::<u128>();
-                    let presses = q.iter().len();
-                    (sum, presses)
-                })
-                .collect_vec();
+                .map(|q| (q.iter().map(|x| **x).sum::<u128>(), q.iter().len()))
+            {
+                combinations
+                    .entry(sum)
+                    .and_modify(|p| *p = presses.min(*p))
+                    .or_insert(presses);
+            }
 
             solve2(*joltages, &combinations, &mut HashMap::default())
         })
@@ -63,7 +66,7 @@ pub fn part2() -> Option<Solution> {
 
 fn solve2(
     joltages: u128,
-    combinations: &Vec<(u128, usize)>,
+    combinations: &HashMap<u128, usize>,
     cache: &mut HashMap<u128, Option<usize>>,
 ) -> Option<usize> {
     if joltages == 0 {
@@ -116,48 +119,50 @@ fn is_even(a: u128) -> bool {
 
 fn parse() -> Vec<(u16, Vec<u16>)> {
     let mut machines = Vec::new();
+
     for line in INPUT.lines() {
         let mut bytes = line.bytes();
         let mut state = 0;
-        let mut size = 0;
+        let mut i = 0;
 
         while let Some(b) = bytes.next() {
             match b {
-                b'#' | b'.' => {
-                    state = state * 2 + if b == b'#' { 1 } else { 0 };
-                    size += 1;
+                b'#' => {
+                    state |= 1 << i;
+                    i += 1;
                 }
-                b'[' => {}
-                b']' => {
-                    machines.push((state, Vec::new()));
-                    break;
-                }
-                _ => break,
+                b'.' => i += 1,
+                b'(' => break,
+                _ => {}
             }
         }
 
         let mut button = 0;
+        let mut buttons = Vec::new();
+
         while let Some(c) = bytes.next() {
             match c {
                 b'{' => break,
                 b')' => {
-                    machines.last_mut().unwrap().1.push(button);
+                    buttons.push(button);
                     button = 0;
                 }
                 c => {
                     if c.is_ascii_digit() {
-                        button |= 1 << (size - c - 1);
+                        button |= 1 << c - b'0';
                     }
                 }
             }
         }
+
+        machines.push((state, buttons));
     }
 
     machines
 }
 
 fn parse2() -> Vec<(Vec<u128>, u128)> {
-    let mut s = Vec::new();
+    let mut machines = Vec::new();
 
     for line in INPUT.lines() {
         let mut bytes = line.bytes();
@@ -179,14 +184,15 @@ fn parse2() -> Vec<(Vec<u128>, u128)> {
             }
         }
 
-        let lights = from_fn(|| Parsable::<u128>::next_number(&mut bytes))
-            .enumerate()
-            .fold(0, |acc, (i, c)| acc + (c << i * 10));
-
-        s.push((buttons, lights));
+        machines.push((
+            buttons,
+            from_fn(|| Parsable::<u128>::next_number(&mut bytes))
+                .enumerate()
+                .fold(0, |acc, (i, c)| acc + (c << i * 10)),
+        ));
     }
 
-    s
+    machines
 }
 
 #[derive(Debug)]

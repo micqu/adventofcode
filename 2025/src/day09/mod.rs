@@ -20,11 +20,13 @@ pub fn part1() -> Option<Solution> {
 }
 
 pub fn part2() -> Option<Solution> {
-    let v = parse();
+    let mut v = parse();
+    v.push(v[0]);
+
     let mut dx = Vec::new();
     let mut dy = Vec::new();
 
-    for (a, b) in v.iter().cycle().take(v.len() + 1).tuple_windows() {
+    for (a, b) in v.iter().tuple_windows() {
         if b.x - a.x != 0 {
             dx.push((a, b, b.x - a.x > 0));
         } else {
@@ -37,96 +39,89 @@ pub fn part2() -> Option<Solution> {
 
     let sizes = v
         .iter()
-        .cycle()
-        .take(v.len() + 1)
         .tuple_combinations()
-        .map(|(a, b)| ((a.x.abs_diff(b.x) + 1) * (a.y.abs_diff(b.y) + 1), a, b))
-        .sorted_unstable_by(|a, b| b.0.cmp(&a.0))
-        .collect_vec();
+        .filter_map(|(a, b)| {
+            if a.x == b.x || a.y == b.y {
+                None
+            } else {
+                Some(((a.x.abs_diff(b.x) + 1) * (a.y.abs_diff(b.y) + 1), a, b))
+            }
+        })
+        .sorted_unstable_by(|a, b| b.0.cmp(&a.0));
 
     for (area, a, b) in sizes {
-        if a.x == b.x || a.y == b.y {
-            continue;
-        }
-
         let (x_min, x_max) = (a.x.min(b.x) + 1, a.x.max(b.x) - 1);
         let (y_min, y_max) = (a.y.min(b.y) + 1, a.y.max(b.y) - 1);
 
-        let inner = [
-            (&Point2d::new(x_min, y_min), &Point2d::new(x_max, y_min)),
-            (&Point2d::new(x_min, y_max), &Point2d::new(x_max, y_max)),
-            (&Point2d::new(x_min, y_min), &Point2d::new(x_min, y_max)),
-            (&Point2d::new(x_max, y_min), &Point2d::new(x_max, y_max)),
-        ];
-
-        let mid = Point2d::new((x_min + x_max) / 2, (y_min + y_max) / 2);
-
-        let d = b - a;
-        if [Point2d::new(a.x + d.x, a.y), Point2d::new(a.x, a.y + d.y)]
-            .iter()
-            .all(|n| valid_rectangle(&n, &mid, inner, &dx, &dy))
+        if !valid_rectangle(x_min, x_max, y_min, y_max, &dx, &dy)
+            || !inside(&Point2d::new(b.x, a.y), &dx)
+            || !inside(&Point2d::new(a.x, b.y), &dx)
+            || !inside(&Point2d::new(x_min, y_min), &dx)
         {
-            return area.solution();
+            continue;
         }
+
+        return area.solution();
     }
 
     None
 }
 
 fn valid_rectangle(
-    n: &Point2d,
-    mid: &Point2d,
-    inner_rect: [(&Point2d, &Point2d); 4],
+    x_min: isize,
+    x_max: isize,
+    y_min: isize,
+    y_max: isize,
     dx: &Vec<(&Point2d, &Point2d, bool)>,
     dy: &Vec<(&Point2d, &Point2d)>,
 ) -> bool {
+    let rect_horizontal = [
+        (Point2d::new(x_min, y_min), Point2d::new(x_max, y_min)),
+        (Point2d::new(x_min, y_max), Point2d::new(x_max, y_max)),
+    ];
+
     for &e in dy {
-        for &line in inner_rect.iter().take(2) {
-            if e.0.x < line.0.x || e.0.x > line.1.x {
+        for (a, b) in rect_horizontal {
+            if e.0.x < a.x || e.0.x > b.x {
                 break;
             }
 
-            if e.0.y.min(e.1.y) < line.0.y && line.0.y < e.0.y.max(e.1.y) {
+            if e.0.y.min(e.1.y) < a.y && a.y < e.0.y.max(e.1.y) {
                 return false;
             }
         }
     }
+
+    let rect_vertical = [
+        (Point2d::new(x_min, y_min), Point2d::new(x_min, y_max)),
+        (Point2d::new(x_max, y_min), Point2d::new(x_max, y_max)),
+    ];
 
     for &e in dx {
-        for &line in inner_rect.iter().skip(2) {
-            if e.0.y < line.0.y || e.0.y > line.1.y {
+        for (a, b) in rect_vertical {
+            if e.0.y < a.y || e.0.y > b.y {
                 break;
             }
 
-            if e.0.x.min(e.1.x) < line.0.x && line.0.x < e.0.x.max(e.1.x) {
+            if e.0.x.min(e.1.x) < a.x && a.x < e.0.x.max(e.1.x) {
                 return false;
             }
         }
-    }
-
-    if !inside(&mid, &dx) || !inside(&n, &dx) {
-        return false;
     }
 
     true
 }
 
 fn inside(p: &Point2d, dx: &Vec<(&Point2d, &Point2d, bool)>) -> bool {
-    for (a, b, d) in dx {
-        if a.y > p.y {
-            break;
-        }
-
-        if (p == *a) || (p == *b) {
-            return true;
-        }
-
+    for (a, b, d) in dx.iter().rev() {
         if a.x.min(b.x) <= p.x && p.x <= a.x.max(b.x) {
             if p.y == a.y {
                 return true;
             }
 
-            return *d;
+            if a.y < p.y {
+                return *d;
+            }
         }
     }
 
