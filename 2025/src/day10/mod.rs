@@ -46,17 +46,13 @@ pub fn part2() -> Option<Solution> {
     parse2()
         .iter()
         .filter_map(|(buttons, joltages)| {
-            let mut combinations = HashMap::default();
-
-            for (sum, presses) in (0..=buttons.len())
+            let mut combinations = (0..=buttons.len())
                 .flat_map(|k| buttons.iter().combinations(k))
-                .map(|q| (q.iter().map(|x| **x).sum::<u128>(), q.iter().len()))
-            {
-                combinations
-                    .entry(sum)
-                    .and_modify(|p| *p = presses.min(*p))
-                    .or_insert(presses);
-            }
+                .map(|q| (q.iter().map(|x| **x).sum::<u128>(), q.iter().len() as u8))
+                .collect_vec();
+
+            combinations.sort_unstable_by(|a, b| a.0.cmp(&b.0).then(a.1.cmp(&b.1)));
+            combinations.dedup_by_key(|x| x.0);
 
             solve2(*joltages, &combinations, &mut HashMap::default())
         })
@@ -66,15 +62,15 @@ pub fn part2() -> Option<Solution> {
 
 fn solve2(
     joltages: u128,
-    combinations: &HashMap<u128, usize>,
+    combinations: &Vec<(u128, u8)>,
     cache: &mut HashMap<u128, Option<usize>>,
 ) -> Option<usize> {
-    if joltages == 0 {
-        return Some(0);
-    }
-
     if let Some(c) = cache.get(&joltages) {
         return *c;
+    }
+
+    if joltages == 0 {
+        return Some(0);
     }
 
     let s = combinations
@@ -84,7 +80,7 @@ fn solve2(
                 && is_even(v)
                 && let Some(r) = solve2(v >> 1, combinations, cache)
             {
-                Some(2 * r + presses)
+                Some(2 * r + *presses as usize)
             } else {
                 None
             }
