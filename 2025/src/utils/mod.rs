@@ -1,4 +1,4 @@
-use std::io::{stdin, stdout, Read, Write};
+use std::io::{Read, Write, stdin, stdout};
 
 pub mod grid;
 pub mod math;

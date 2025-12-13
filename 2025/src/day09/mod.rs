@@ -10,53 +10,37 @@ pub const TITLE: &str = "Movie Theater";
 const INPUT: &'static str = include_str!("input.txt");
 
 pub fn part1() -> Option<Solution> {
-    let mut v: Vec<Point2d> = Vec::new();
-    for line in INPUT.lines() {
-        let mut bytes = line.bytes();
-        v.push(Point2d::parse(&mut bytes));
-    }
-
-    let mut m = 0;
-    for i in 0..v.len() - 1 {
-        for j in i + 1..v.len() {
-            let d = v[i] - v[j];
-            m = m.max((d.x.abs() + 1) * (d.y.abs() + 1));
-        }
-    }
-
-    m.solution()
+    parse()
+        .iter()
+        .tuple_combinations::<(_, _)>()
+        .map(|(a, b)| (a.x.abs_diff(b.x) + 1) * (a.y.abs_diff(b.y) + 1))
+        .max()
+        .unwrap()
+        .solution()
 }
 
 pub fn part2() -> Option<Solution> {
-    let mut v: Vec<Point2d> = Vec::new();
-    for line in INPUT.lines() {
-        let mut bytes = line.bytes();
-        v.push(Point2d::parse(&mut bytes));
-    }
-
-    let mut edges = Vec::new();
+    let v = parse();
     let mut dx = Vec::new();
+    let mut dy = Vec::new();
 
     for (a, b) in v.iter().cycle().take(v.len() + 1).tuple_windows() {
-        let d = b - a;
-        if d.x != 0 {
-            dx.push((a, b, d.x > 0));
+        if b.x - a.x != 0 {
+            dx.push((a, b, b.x - a.x > 0));
+        } else {
+            dy.push((a, b));
         }
-
-        edges.push((a, b));
     }
 
     dx.sort_unstable_by_key(|a| a.0.y);
+    dy.sort_unstable_by_key(|a| a.0.x);
 
     let sizes = v
         .iter()
         .cycle()
         .take(v.len() + 1)
         .tuple_combinations()
-        .map(|(a, b)| {
-            let d = b - a;
-            ((d.x.abs() + 1) * (d.y.abs() + 1), a, b)
-        })
+        .map(|(a, b)| ((a.x.abs_diff(b.x) + 1) * (a.y.abs_diff(b.y) + 1), a, b))
         .sorted_unstable_by(|a, b| b.0.cmp(&a.0))
         .collect_vec();
 
@@ -65,56 +49,66 @@ pub fn part2() -> Option<Solution> {
             continue;
         }
 
-        let d = b - a;
-        let mut ok = true;
-
         let (x_min, x_max) = (a.x.min(b.x) + 1, a.x.max(b.x) - 1);
         let (y_min, y_max) = (a.y.min(b.y) + 1, a.y.max(b.y) - 1);
 
         let inner = [
             (&Point2d::new(x_min, y_min), &Point2d::new(x_max, y_min)),
+            (&Point2d::new(x_min, y_max), &Point2d::new(x_max, y_max)),
             (&Point2d::new(x_min, y_min), &Point2d::new(x_min, y_max)),
             (&Point2d::new(x_max, y_min), &Point2d::new(x_max, y_max)),
-            (&Point2d::new(x_min, y_max), &Point2d::new(x_max, y_max)),
         ];
 
         let mid = Point2d::new((x_min + x_max) / 2, (y_min + y_max) / 2);
 
-        for n in [Point2d::new(a.x + d.x, a.y), Point2d::new(a.x, a.y + d.y)] {
-            if !inside(&n, &dx) {
-                ok = false;
-                break;
-            }
-
-            for &(e1, e2) in &edges {
-                for l in inner {
-                    if line_segment_intersects((&e1, &e2), l) {
-                        ok = false;
-                        break;
-                    }
-                }
-
-                if !inside(&mid, &dx) {
-                    ok = false;
-                    break;
-                }
-
-                if !ok {
-                    break;
-                }
-            }
-
-            if !ok {
-                break;
-            }
-        }
-
-        if ok {
+        let d = b - a;
+        if [Point2d::new(a.x + d.x, a.y), Point2d::new(a.x, a.y + d.y)]
+            .iter()
+            .all(|n| valid_rectangle(&n, &mid, inner, &dx, &dy))
+        {
             return area.solution();
         }
     }
 
     None
+}
+
+fn valid_rectangle(
+    n: &Point2d,
+    mid: &Point2d,
+    inner_rect: [(&Point2d, &Point2d); 4],
+    dx: &Vec<(&Point2d, &Point2d, bool)>,
+    dy: &Vec<(&Point2d, &Point2d)>,
+) -> bool {
+    for &e in dy {
+        for &line in inner_rect.iter().take(2) {
+            if e.0.x < line.0.x || e.0.x > line.1.x {
+                break;
+            }
+
+            if e.0.y.min(e.1.y) < line.0.y && line.0.y < e.0.y.max(e.1.y) {
+                return false;
+            }
+        }
+    }
+
+    for &e in dx {
+        for &line in inner_rect.iter().skip(2) {
+            if e.0.y < line.0.y || e.0.y > line.1.y {
+                break;
+            }
+
+            if e.0.x.min(e.1.x) < line.0.x && line.0.x < e.0.x.max(e.1.x) {
+                return false;
+            }
+        }
+    }
+
+    if !inside(&mid, &dx) || !inside(&n, &dx) {
+        return false;
+    }
+
+    true
 }
 
 fn inside(p: &Point2d, dx: &Vec<(&Point2d, &Point2d, bool)>) -> bool {
@@ -139,17 +133,12 @@ fn inside(p: &Point2d, dx: &Vec<(&Point2d, &Point2d, bool)>) -> bool {
     false
 }
 
-fn line_segment_intersects(a: (&Point2d, &Point2d), b: (&Point2d, &Point2d)) -> bool {
-    orient(a.0, a.1, b.0).strict_mul(orient(a.0, a.1, b.1)) < 0
-        && orient(b.0, b.1, a.0).strict_mul(orient(b.0, b.1, a.1)) < 0
-}
-
-fn orient(a: &Point2d, b: &Point2d, c: &Point2d) -> i128 {
-    cross(&(b - a), &(c - a)) as i128
-}
-
-fn cross(a: &Point2d, b: &Point2d) -> isize {
-    a.x * b.y - a.y * b.x
+fn parse() -> Vec<Point2d> {
+    let mut v = Vec::new();
+    for line in INPUT.lines() {
+        v.push(Point2d::parse(&mut line.bytes()));
+    }
+    v
 }
 
 #[cfg(test)]
@@ -158,11 +147,11 @@ mod tests {
 
     #[test]
     fn part1() {
-        assert_eq!(super::part1(), (4741451444 as isize).solution());
+        assert_eq!(super::part1(), (4741451444 as usize).solution());
     }
 
     #[test]
     fn part2() {
-        assert_eq!(super::part2(), (1562459680 as isize).solution());
+        assert_eq!(super::part2(), (1562459680 as usize).solution());
     }
 }
